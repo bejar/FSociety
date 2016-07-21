@@ -6,7 +6,7 @@ Constants
 
 :Description: Constants
 
-    Constants for the data
+    Constants for the project
 
 :Authors: bejar
     
