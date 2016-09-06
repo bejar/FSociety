@@ -25,7 +25,7 @@ pd.__version__ = '0.18'
 import matplotlib.pyplot as plt
 import seaborn as sn
 import numpy as np
-from Constants import ITCH_files, datapath
+from Constants import ITCH_files, datapath, NASDAQ_actions
 
 __author__ = 'bejar'
 
@@ -45,7 +45,7 @@ def summarize_stock_action_agent(structure):
 
 
 if __name__ == '__main__':
-    filename = ITCH_files[0]
+    filename = ITCH_files[1]
     nrec = 0
     dataset = ITCHv5(datapath + filename)
 
@@ -68,54 +68,59 @@ if __name__ == '__main__':
     print(filename)
     for g in gendata:
         action = dataset.to_string(g[0])
-        if action == 'F':
-            stock = dataset.to_string(g[7])
-            agent = dataset.to_string(g[9])
-            order = dataset.to_string(g[5])
-            itime = ITCHtime(g[3])
+        if action not in actionsdic:
+            actionsdic[action] = 1
+        else:
+            actionsdic[action] += 1
 
-            if order == 'B':
-                buy[itime.hours] += 1
-            else:
-                sell[itime.hours] += 1
-            # if not agent in agentsset:
-            #     print(agent)
-            # if not stock in stockdic:
-            #     stockdic[stock] = {}
-            # if not order in stockdic[stock]:
-            #     stockdic[stock][order] = {}
-            # if not agent in stockdic[stock][order]:
-            #     stockdic[stock][order][agent] = 0
-            #
-            # stockdic[stock][order][agent] += 1
-
-            if itime.hours != ophour:
-                print('-----> H:', ophour, 'B:',buy[ophour], 'S:',sell[ophour])
-                ophour = itime.hours
-
-        if action == 'A':
-            stock = dataset.to_string(g[7])
-            order = dataset.to_string(g[5])
-            itime = ITCHtime(g[3])
-
-            if order == 'B':
-                uabuy[itime.hours] += 1
-            else:
-                uasell[itime.hours] += 1
-            # if not agent in agentsset:
-            #     print(agent)
-            # if not stock in stockdic:
-            #     stockdic[stock] = {}
-            # if not order in stockdic[stock]:
-            #     stockdic[stock][order] = {}
-            # if not agent in stockdic[stock][order]:
-            #     stockdic[stock][order][agent] = 0
-            #
-            # stockdic[stock][order][agent] += 1
-
-            if itime.hours != uophour:
-                print('U----> H:', ophour, 'B:', uabuy[ophour], 'S:', uasell[ophour])
-                uophour = itime.hours
+        # if action == 'F':
+        #     stock = dataset.to_string(g[7])
+        #     agent = dataset.to_string(g[9])
+        #     order = dataset.to_string(g[5])
+        #     itime = ITCHtime(g[3])
+        #
+        #     if order == 'B':
+        #         buy[itime.hours] += 1
+        #     else:
+        #         sell[itime.hours] += 1
+        #     # if not agent in agentsset:
+        #     #     print(agent)
+        #     # if not stock in stockdic:
+        #     #     stockdic[stock] = {}
+        #     # if not order in stockdic[stock]:
+        #     #     stockdic[stock][order] = {}
+        #     # if not agent in stockdic[stock][order]:
+        #     #     stockdic[stock][order][agent] = 0
+        #     #
+        #     # stockdic[stock][order][agent] += 1
+        #
+        #     if itime.hours != ophour:
+        #         print('-----> H:', ophour, 'B:',buy[ophour], 'S:',sell[ophour])
+        #         ophour = itime.hours
+        #
+        # if action == 'A':
+        #     stock = dataset.to_string(g[7])
+        #     order = dataset.to_string(g[5])
+        #     itime = ITCHtime(g[3])
+        #
+        #     if order == 'B':
+        #         uabuy[itime.hours] += 1
+        #     else:
+        #         uasell[itime.hours] += 1
+        #     # if not agent in agentsset:
+        #     #     print(agent)
+        #     # if not stock in stockdic:
+        #     #     stockdic[stock] = {}
+        #     # if not order in stockdic[stock]:
+        #     #     stockdic[stock][order] = {}
+        #     # if not agent in stockdic[stock][order]:
+        #     #     stockdic[stock][order][agent] = 0
+        #     #
+        #     # stockdic[stock][order][agent] += 1
+        #
+        #     if itime.hours != uophour:
+        #         print('U----> H:', ophour, 'B:', uabuy[ophour], 'S:', uasell[ophour])
+        #         uophour = itime.hours
 
         if action == 'S':
             itime = ITCHtime(g[3])
@@ -124,6 +129,7 @@ if __name__ == '__main__':
 
         if i > 1000000:
             nrec += i
+            itime = ITCHtime(g[3])
             print(i, nrec, g[3], itime.to_string())
             #summarize_stock_action_agent(stockdic)
             # for v in actionsdic:
@@ -142,17 +148,19 @@ if __name__ == '__main__':
     #     print(v, actionsdic[v])
     #summarize_stock_action_agent(stockdic)
 
-    fig = plt.figure()
-    fig.set_figwidth(6)
-    fig.set_figheight(4)
-
-    rvals = [v for v in range(24)]
-    ax = fig.add_subplot(2, 2, 1)
-    sn.barplot(rvals, buy)
-    ax = fig.add_subplot(2, 2, 2)
-    sn.barplot(rvals,sell)
-    ax = fig.add_subplot(2, 2, 3)
-    sn.barplot(rvals, uabuy)
-    ax = fig.add_subplot(2, 2, 4)
-    sn.barplot(rvals, uasell)
-    plt.show()
+    # fig = plt.figure()
+    # fig.set_figwidth(6)
+    # fig.set_figheight(4)
+    #
+    # rvals = [v for v in range(24)]
+    # ax = fig.add_subplot(2, 2, 1)
+    # sn.barplot(rvals, buy)
+    # ax = fig.add_subplot(2, 2, 2)
+    # sn.barplot(rvals,sell)
+    # ax = fig.add_subplot(2, 2, 3)
+    # sn.barplot(rvals, uabuy)
+    # ax = fig.add_subplot(2, 2, 4)
+    # sn.barplot(rvals, uasell)
+    # plt.show()
+    for ac in actionsdic:
+        print(ac, actionsdic[ac], NASDAQ_actions[ac])
