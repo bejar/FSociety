@@ -24,11 +24,13 @@ from ITCHbin import ITCHv5
 from ITCHtime import ITCHtime
 from Util import now
 import pandas as pd
+
 pd.__version__ = '0.18'
 import matplotlib.pyplot as plt
 import seaborn as sn
 import numpy as np
 from Constants import ITCH_files, datapath, NASDAQ_actions
+from Company import Company
 
 __author__ = 'bejar'
 
@@ -68,6 +70,12 @@ if __name__ == '__main__':
         i += 1
     now()
 
+    cmp = Company()
+
     for val in stockdic:
-        print(val, stockdic[val])
+        cvalues = cmp.get_company(val.strip())
+        if cvalues is not None:
+            print(val, cvalues[1], cvalues[2], stockdic[val])
+        else:
+            print(val, stockdic[val])
 

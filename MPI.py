@@ -19,6 +19,7 @@ MPIname
 
 __author__ = 'bejar'
 
+
 class MPI():
     """
     Structure for the MPI names

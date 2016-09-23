@@ -18,3 +18,31 @@ Companies
 """
 
 __author__ = 'bejar'
+
+
+class Company:
+
+    cnames = {}
+
+    def __init__(self):
+        """
+        Reads the companies from a file and stores it in a dictionary
+        """
+
+        f = open('./Data/companylist.csv','r')
+
+        for line in f:
+            reg = line.split(',')
+            if reg[0] != 'Symbol':
+                if reg[0] not in self.cnames:
+                    self.cnames[reg[0]] = [reg[1], reg[2], reg[3], reg[4]]
+
+
+    def get_company(self, cmp):
+        """
+        Returns the data for the company
+        :param cmp:
+        :return:
+        """
+        if cmp in self.cnames:
+            return self.cnames[cmp]
