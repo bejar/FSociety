@@ -51,6 +51,13 @@ class ITCHtime:
         return '{:02d}:{:02d}:{:02d}.{:03d}.{:03d}.{:03d}'.format(self.hours, self.minutes, self.seconds,
                                                                   self.mlseconds, self.mcseconds, self.nnseconds)
 
+    def stamp(self):
+        """
+        Nanoseconds as a string
+        :return:
+        """
+        return str(self.itime)
+
 
 
 if __name__ == '__main__':
