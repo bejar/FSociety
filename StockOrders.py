@@ -44,6 +44,8 @@ class StockOrders:
             self.dorders[id] = stock
         if action == 'U':
             self.dorders[id] = stock
+        if action == 'D' and id in self.dorders:
+            del self.dorders[id]
 
     def query_id(self, id):
         if id in self.dorders:
