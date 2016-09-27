@@ -24,6 +24,8 @@ class StockOrders:
     Class to store the identifiers of the orders in the buy/sell/replace/cancel/delete messages
 
     Indexing by the id because is the information in the modify, cancel, delete and execution orders
+
+    Each element stores the stock tick and the time of the order
     """
     dorders = None
     def __init__(self):
@@ -32,19 +34,19 @@ class StockOrders:
         """
         self.dorders = {}
 
-    def insert_order(self, stock, action, id):
+    def insert_order(self, stock, order, id, otime=None, bos=None, updid=None, price=None):
         """
         Inserts an order in the structure
 
-        :param action:
+        :param order:
         :param id:
         :return:
         """
-        if action in ['A', 'F']:
-            self.dorders[id] = stock
-        if action == 'U':
-            self.dorders[id] = stock
-        if action == 'D' and id in self.dorders:
+        if order in ['A', 'F']:
+            self.dorders[id] = (stock, int(otime), bos, price)
+        if order == 'U':
+            self.dorders[id] = (stock, int(otime), self.dorders[updid][2], price)
+        if order == 'D' and id in self.dorders:
             del self.dorders[id]
 
     def query_id(self, id):

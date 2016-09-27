@@ -29,16 +29,16 @@ class Company:
         Reads the companies from a file and stores it in a dictionary
         """
 
-        f = open('./Data/companylist.csv','r')
+        f = open('../Data/companylist.csv','r')
 
         for line in f:
             reg = line.split(',')
             if reg[0] != 'Symbol':
                 if reg[0] not in self.cnames:
-                    self.cnames[reg[0]] = [reg[1], reg[2], reg[3], reg[4]]
+                    self.cnames[reg[0]] = [reg[1], reg[2], reg[3], reg[4].strip()]
                 else:
-                    if reg[4] != 'ASX':
-                        self.cnames[reg[0]] = [reg[1], reg[2], reg[3], reg[4]]
+                    if reg[4].strip() != 'ASX':
+                        self.cnames[reg[0]] = [reg[1], reg[2], reg[3], reg[4].strip()]
 
 
     def get_company(self, cmp):
@@ -49,6 +49,8 @@ class Company:
         """
         if cmp in self.cnames:
             return self.cnames[cmp]
+        else:
+            return None
 
 if __name__ == '__main__':
     c = Company()

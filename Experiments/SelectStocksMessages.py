@@ -51,23 +51,23 @@ if __name__ == '__main__':
         wfile = open(datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv', 'w')
         sorders = StockOrders()
         for g in gendata:
-            action = dataset.to_string(g[0])
-            if action in ['F', 'A']:
+            order = dataset.to_string(g[0])
+            if order in ['F', 'A']:
                 stock = dataset.to_string(g[7]).strip()
                 if stock in sstocks:
                     record = ITCHRecord(g)
-                    sorders.insert_order(stock, action, record.ORN)
+                    sorders.insert_order(stock, order, record.ORN, record.timestamp)
                     wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
 
-            if action in ['E', 'C', 'X', 'D', 'U']:
+            if order in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)
-                stock = sorders.query_id(record.ORN)
-                if  stock is not None and stock in sstocks:
+                stock = sorders.query_id(record.ORN)[0]
+                if stock is not None and stock in sstocks:
                     wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
-                if action == 'U':
-                    sorders.insert_order(stock, action, record.nORN)
-                if action == 'D':
-                    sorders.insert_order(stock, action, record.ORN)
+                if order == 'U':
+                    sorders.insert_order(stock, order, record.nORN, record.timestamp)
+                if order == 'D':
+                    sorders.insert_order(stock, order, record.ORN)
 
             if i == 1000000:
                 #itime = ITCHtime(g[3])
