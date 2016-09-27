@@ -6,7 +6,7 @@ Stocks
 
 :Description: Stocks
 
-    
+    Genera una lista del numero de mensajes de venta/compra que aparecen en un dia
 
 :Authors: bejar
     
@@ -19,20 +19,11 @@ Stocks
 
 __author__ = 'bejar'
 
-
-from ITCHbin import ITCHv5
-from ITCHtime import ITCHtime
-from ITCHRecord import ITCHRecord
-from Util import now
 import pandas as pd
 
 pd.__version__ = '0.18'
-import matplotlib.pyplot as plt
-import seaborn as sn
-import numpy as np
-from Constants import ITCH_files, datapath, NASDAQ_actions
-from Company import Company
 
+from Util  import ITCH_files, datapath, Company, ITCHRecord, ITCHtime, now, ITCHv5
 __author__ = 'bejar'
 
 
@@ -52,8 +43,8 @@ if __name__ == '__main__':
         record = ITCHRecord(g)
         action = dataset.to_string(g[0])
 
-        if action in ['A', 'F', 'E', 'C', 'X', 'D', 'U', 'P']:
-            print(record.to_string())
+        # if action in ['A', 'F', 'E', 'C', 'X', 'D', 'U', 'P']:
+        #     print(record.to_string())
 
 
         if action in ['F', 'A']:
@@ -69,10 +60,7 @@ if __name__ == '__main__':
         if i == 1000000:
             itime = ITCHtime(g[3])
             print(i,  g[3], itime.to_string())
-            #summarize_stock_action_agent(stockdic)
-            # for v in actionsdic:
-            #     print(v, actionsdic[v])
-            #     print('##################################')
+
             i = 0
         i += 1
     now()

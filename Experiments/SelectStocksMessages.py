@@ -6,7 +6,9 @@ Stocks
 
 :Description: Stocks
 
-    
+    Selecciona los mensajes F/A/E/X/D/U/C que aparecen en un dia para las
+    compañias en el fichero 'stockselected.csv' (250 compañias con mas operaciones
+    de compra/venta)
 
 :Authors: bejar
     
@@ -17,29 +19,21 @@ Stocks
 
 """
 
-__author__ = 'bejar'
 
 
-from ITCHbin import ITCHv5
-from ITCHtime import ITCHtime
-from ITCHRecord import ITCHRecord
-from Util import now
 import pandas as pd
 
+from Util import ITCHv5, ITCHRecord, now, ITCH_files, datapath, StockOrders, ITCH_days
+
 pd.__version__ = '0.18'
-import matplotlib.pyplot as plt
-import seaborn as sn
-import numpy as np
-from Constants import ITCH_files, datapath, NASDAQ_actions
-from Company import Company
-from StockOrders import StockOrders
+
 
 __author__ = 'bejar'
 
 
 if __name__ == '__main__':
 
-    file = './Data/stockselected.csv'
+    file = '../Data/stockselected.csv'
     rfile = open(file, 'r')
     sstocks = set()
     for stock in rfile:
@@ -63,7 +57,7 @@ if __name__ == '__main__':
                 if stock in sstocks:
                     record = ITCHRecord(g)
                     sorders.insert_order(stock, action, record.ORN)
-                    wfile.write('%s, %s\n'%(stock.strip(), record.to_string()))
+                    wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
 
             if action in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)

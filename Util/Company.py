@@ -36,6 +36,9 @@ class Company:
             if reg[0] != 'Symbol':
                 if reg[0] not in self.cnames:
                     self.cnames[reg[0]] = [reg[1], reg[2], reg[3], reg[4]]
+                else:
+                    if reg[4] != 'ASX':
+                        self.cnames[reg[0]] = [reg[1], reg[2], reg[3], reg[4]]
 
 
     def get_company(self, cmp):
@@ -46,3 +49,9 @@ class Company:
         """
         if cmp in self.cnames:
             return self.cnames[cmp]
+
+if __name__ == '__main__':
+    c = Company()
+
+    for cmp in sorted(c.cnames.items()):
+        print(cmp[0])

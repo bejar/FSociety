@@ -2,10 +2,10 @@
 
 It assumes their squirrelly binary message format.'''
 
-import struct
 import gzip
-import numpy as np
-from utility import ManyWriters
+import struct
+
+from Util.utility import ManyWriters
 
 
 class ITCHv5:

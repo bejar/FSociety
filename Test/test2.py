@@ -20,7 +20,7 @@ import operator
 
 __author__ = 'bejar'
 
-file = './Data/extstocks.csv'
+file = '../Data/extstocks.csv'
 
 
 wfile = open(file, 'r')

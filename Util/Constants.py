@@ -22,6 +22,7 @@ __author__ = 'bejar'
 datapath = '/home/bejar/storage/Data/ITCH/'
 
 ITCH_files = ['12302015.NASDAQ_ITCH50.gz', '05272016.NASDAQ_ITCH50.gz', '03302016.NASDAQ_ITCH50.gz']
+ITCH_days = ['12302015', '05272016', '03302016']
 
 NASDAQ_actions = {
     'S': 'System Event Message',

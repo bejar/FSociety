@@ -17,15 +17,12 @@ test
 
 """
 
-from ITCHbin import ITCHv5
-from ITCHtime import ITCHtime
-from Util import now
 import pandas as pd
+
 pd.__version__ = '0.18'
-import matplotlib.pyplot as plt
-import seaborn as sn
+
 import numpy as np
-from Constants import ITCH_files, datapath, NASDAQ_actions
+from Util import ITCH_files, datapath, NASDAQ_actions, ITCHtime, now, ITCHv5
 
 __author__ = 'bejar'
 
