@@ -29,8 +29,8 @@ pd.__version__ = '0.18'
 __author__ = 'bejar'
 
 if __name__ == '__main__':
-    stock = 'GOOGL'
-    day = ITCH_days[1]
+    stock = 'AAL'
+    day = ITCH_days[0]
     sorders = StockOrders()
     cpny = Company()
     rfile = open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv', 'r')

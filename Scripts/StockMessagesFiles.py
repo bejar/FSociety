@@ -17,7 +17,7 @@ StockMessagesFiles
 
 """
 
-from Util import datapath, ITCH_files
+from Util import datapath, ITCH_files, Stock
 import os
 
 __author__ = 'bejar'
@@ -25,15 +25,12 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
 
-    file = '../Data/stockselected.csv'
-    rfile = open(file, 'r')
-    sstocks = set()
-    for stock in rfile:
-        sstocks.add(stock.strip())
-    rfile.close()
+
+    sstocks = Stock()
+
     for filename in ITCH_files:
         dname = filename.split('.')[0]
-        for stock in sstocks:
+        for stock in sstocks.get_list_stocks():
             print(dname, stock)
             os.system(' zcat ' + datapath + '/Results/' + dname +
                       '-STOCK-MESSAGES-250.csv.gz |grep \'#'+stock+'\' > ' +datapath + dname + '-' + stock +'-MESSAGES.csv' )
