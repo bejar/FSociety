@@ -90,5 +90,5 @@ if __name__ == '__main__':
                 wfile.write(str(len(ldelete)) + ',' + str(np.mean(ldelete)) + ',' + str(np.max(ldelete)) + ','+ str(np.min(ldelete)) + '\n')
 
             print()
-
+            rfile.close()
     wfile.close()

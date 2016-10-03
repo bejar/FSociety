@@ -76,7 +76,7 @@ class ITCHRecord():
         if self.action in ['P']:
             self.matchnum = int(record[9])
 
-        if self.action in ['C']:
+        if self.action in ['C', 'P']:
             self.price = int(record[8])
 
 
@@ -113,7 +113,7 @@ class ITCHRecord():
             rstr += ', ' + self.stock
             rstr += ', ' + self.order
 
-        if self.action in ['A', 'F', 'U']:
+        if self.action in ['A', 'F', 'U', 'P']:
             rstr += ', ' + str(self.shares)
 
         if self.action in ['F']:

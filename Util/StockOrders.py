@@ -43,9 +43,9 @@ class StockOrders:
         :return:
         """
         if order in ['A', 'F']:
-            self.dorders[id] = (stock, int(otime), bos, price)
+            self.dorders[id] = (stock, int(otime.stamp()), bos, price)
         if order == 'U':
-            self.dorders[id] = (stock, int(otime), self.dorders[updid][2], price)
+            self.dorders[id] = (stock, int(otime.stamp()), self.dorders[updid][2], price)
         if order == 'D' and id in self.dorders:
             del self.dorders[id]
 

@@ -33,4 +33,4 @@ if __name__ == '__main__':
         for stock in sstocks.get_list_stocks():
             print(dname, stock)
             os.system(' zcat ' + datapath + '/Results/' + dname +
-                      '-STOCK-MESSAGES-250.csv.gz |grep \'#'+stock+'\' > ' +datapath + dname + '-' + stock +'-MESSAGES.csv' )
+                      '-STOCK-MESSAGES-250.csv.gz |grep \'#'+stock+'\' > ' +datapath + '/Messages/' + dname + '-' + stock +'-MESSAGES.csv' )

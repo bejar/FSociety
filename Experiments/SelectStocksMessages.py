@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     for filename in ITCH_files:
         now()
-        i= 0
+        i = 0
         dataset = ITCHv5(datapath + filename)
         gendata = dataset.records()
         stockdic = {}
@@ -61,13 +61,22 @@ if __name__ == '__main__':
 
             if order in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)
-                stock = sorders.query_id(record.ORN)[0]
+                stock = sorders.query_id(record.ORN)
+                if stock is not None:
+                    stock = stock[0]
+                    if stock in sstocks:
+                        wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
+                        if order == 'U':
+                            sorders.insert_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp, price=record.price)
+                        if order == 'D':
+                            sorders.insert_order(stock, order, record.ORN)
+
+            if order in ['P']:
+                record = ITCHRecord(g)
+                stock = record.stock
                 if stock is not None and stock in sstocks:
                     wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
-                if order == 'U':
-                    sorders.insert_order(stock, order, record.nORN, record.timestamp)
-                if order == 'D':
-                    sorders.insert_order(stock, order, record.ORN)
+
 
             if i == 1000000:
                 #itime = ITCHtime(g[3])
