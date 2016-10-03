@@ -6,7 +6,8 @@ MessagesAnalysisView
 
 :Description: MessagesAnalysisView
 
-    
+    Visualizacion para todas las acciones la distribucion de numero de operaciones, ventas/compras y
+    tiempos entre ventas/compras y borrados
 
 :Authors: bejar
     

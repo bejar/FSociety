@@ -6,7 +6,7 @@ Stocks
 
 :Description: Stocks
 
-    Genera una lista del numero de mensajes de venta/compra que aparecen en un dia
+    Genera una lista del numero de mensajes de venta/compra que aparecen en un dia para cada compañia
 
 :Authors: bejar
     
