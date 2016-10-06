@@ -24,12 +24,15 @@ class Company:
 
     cnames = {}
 
-    def __init__(self):
+    def __init__(self, abs=True):
         """
         Reads the companies from a file and stores it in a dictionary
         """
 
-        f = open('../Data/companylist.csv','r')
+        if abs:
+            f = open('../Data/companylist.csv', 'r')
+        else:
+            f = open('Data/companylist.csv', 'r')
 
         for line in f:
             reg = line.split(',')

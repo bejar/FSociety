@@ -34,18 +34,24 @@ class StockOrders:
         """
         self.dorders = {}
 
-    def insert_order(self, stock, order, id, otime=None, bos=None, updid=None, price=None):
+    def insert_order(self, stock, order, id, otime=None, bos=None, updid=None, price=None, size=None):
         """
         Inserts an order in the structure
 
-        :param order:
-        :param id:
+        :param stock: Nombre de la accion
+        :param otime: Tiempo orden en ITCHtime
+        :param bos:  Compra o venta (B/S)
+        :param updid: Actualizacion del ID de la orden (para modificaciones)
+        :param price: precio de la orden
+        :param size: Tamaño de la orden
+        :param order: Tipo de orden
+        :param id: Identificador de la orden
         :return:
         """
         if order in ['A', 'F']:
-            self.dorders[id] = (stock, int(otime.stamp()), bos, price)
+            self.dorders[id] = (stock, int(otime.stamp()), bos, price, size)
         if order == 'U':
-            self.dorders[id] = (stock, int(otime.stamp()), self.dorders[updid][2], price)
+            self.dorders[id] = (stock, int(otime.stamp()), self.dorders[updid][2], price, size)
         if order == 'D' and id in self.dorders:
             del self.dorders[id]
 

@@ -24,11 +24,14 @@ __author__ = 'bejar'
 class Stock:
 
     sstock = None
-    def __init__(self):
+    def __init__(self, abs=True):
         """
 
         """
-        file = '../Data/stockselected.csv'
+        if abs:
+            file = '../Data/stockselected.csv'
+        else:
+            file = 'Data/stockselected.csv'
         rfile = open(file, 'r')
         self.sstocks = {}
         for stock in rfile:

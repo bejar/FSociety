@@ -13,6 +13,7 @@ MessageAnalysis
       - Distribucion de precios de compra y venta
       - Distribucion de delta de tiempo de ordenes de compra y venta y borrados
       - Secuencia de precios y ejecuciones
+      - Distribucion de los tamaños de las ordenes
 
 :Authors: bejar
     
@@ -23,7 +24,7 @@ MessageAnalysis
 
 """
 
-from Util import  datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, ITCHtime
+from Util import datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, ITCHtime, capped_prices
 
 import pandas as pd
 import numpy as np
@@ -32,24 +33,12 @@ import matplotlib.pyplot as plt
 
 pd.__version__ = '0.18'
 
-def capped_prices(lprices):
-    """
-    List of prices without extreme values
-    :param lprices:
-    :return:
-    """
-    price_std = np.std(lprices)
-    price_mean = np.mean(lprices)
-    aprice = np.array(lprices)
-    aprice = aprice[np.logical_and(aprice > (price_mean - (price_std)),
-                                aprice < (price_mean + (price_std)))]
 
-    return aprice
 
 __author__ = 'bejar'
 
 if __name__ == '__main__':
-    stock = 'ABT'
+    stock = 'GOOGL'
     day = ITCH_days[0]
     sorders = StockOrders()
     cpny = Company()
@@ -61,7 +50,10 @@ if __name__ == '__main__':
     ltimeOB = []
     lpriceOS = []
     lpriceOB = []
+    lsizeOB = []
+    lsizeOS = []
     ldelete = []
+
 
     ltimeEB = []
     ltimeES = []
@@ -69,6 +61,9 @@ if __name__ == '__main__':
     lpriceEB = []
     ltimeEP = []   # Ordenes ocultas
     lpriceEP = []
+    lsizeEB = []
+    lsizeES = []
+    lsizeEP = []
 
     i = 0
     norders = 0
@@ -82,18 +77,20 @@ if __name__ == '__main__':
                 price = float(data[7].strip())
             else:
                 price = float(data[8].strip())
-            sorders.insert_order(stock, order, ORN, otime=timestamp, bos=data[5].strip(), price=price)
+            sorders.insert_order(stock, order, ORN, otime=timestamp, bos=data[5].strip(), price=price, size=int(data[6].strip()))
             norders += 1
             if 0.5 < price < 1000:
                 if data[5].strip() == 'B':
                     lpriceOB.append(price)
                     ltimeOB.append(timestamp.itime)
+                    lsizeOB.append(int(data[6].strip()))
                 else:
                     lpriceOS.append(price)
                     ltimeOS.append(timestamp.itime)
+                    lsizeOS.append(int(data[6].strip()))
         if order == 'U':
             nORN =  data[4].strip()
-            sorders.insert_order(stock, order, nORN, timestamp, updid=ORN, price=float(data[6].strip()))
+            sorders.insert_order(stock, order, nORN, timestamp, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
         # Computes the time between placing and order and canceling it
         if order == 'D':
             trans = sorders.query_id(ORN)
@@ -106,13 +103,16 @@ if __name__ == '__main__':
                 lexecutionsS.append(timestamp.itime - trans[1])
                 ltimeES.append(timestamp.itime)
                 lpriceES.append(trans[3])
+                lsizeES.append(trans[4])
             else:
                 lexecutionsB.append(timestamp.itime - trans[1])
                 ltimeEB.append(timestamp.itime)
                 lpriceEB.append(trans[3])
+                lsizeEB.append(trans[4])
         if order in ['P']:
             ltimeEP.append(timestamp.itime)
             lpriceEP.append(float(data[7].strip()))
+            lsizeEP.append(int(data[6].strip()))
 
         i += 1
         if i % 10000 == 0:
@@ -142,6 +142,7 @@ if __name__ == '__main__':
         print('Mean time to execution:', nanoseconds_to_time(np.mean(lexecutionsB)))
         print('Max time to execution:', nanoseconds_to_time(np.max(lexecutionsB)))
         print('Min time to execution:', nanoseconds_to_time(np.min(lexecutionsB)))
+        print('N Hiden Executions:', len(ltimeEP))
         ax = sns.distplot(np.log10(lexecutionsB),  kde=True, norm_hist=True)
         plt.title('Log plot of Buy execution time ' + day)
         plt.show()
@@ -173,6 +174,17 @@ if __name__ == '__main__':
         plt.title('Sell/Buy orders prices distribution ' + day)
         plt.show()
         plt.close()
+        ax = sns.distplot(capped_prices(lsizeOS),  kde=True, hist=True, color='r')
+        ax = sns.distplot(capped_prices(lsizeOB),  kde=True, hist=True, color='g')
+        plt.title('Sell/Buy orders sizes distribution ' + day)
+        plt.show()
+        plt.close()
+        ax = sns.distplot(capped_prices(lsizeES),  kde=True, hist=True, color='r')
+        ax = sns.distplot(capped_prices(lsizeEB),  kde=True, hist=True, color='g')
+        ax = sns.distplot(capped_prices(lsizeEP),  kde=True, hist=True, color='k')
+        plt.title('Sell/Buy/Hidden execution sizes distribution ' + day)
+        plt.show()
+        plt.close()
         ax = sns.distplot(capped_prices(lpriceES),  kde=True, hist=False, color='r')
         ax = sns.distplot(capped_prices(lpriceEB),  kde=True, hist=False, color='g')
         ax = sns.distplot(capped_prices(lpriceEP),  kde=True, hist=False, color='k')
@@ -182,9 +194,9 @@ if __name__ == '__main__':
 
     plt.plot(ltimeOS, lpriceOS, color='r')
     plt.plot(ltimeOB, lpriceOB, color='g')
-    plt.plot(ltimeES, lpriceES, 'bo')
-    plt.plot(ltimeEB, lpriceEB, 'co')
-    plt.plot(ltimeEP, lpriceEP, 'ko')
+    plt.scatter(ltimeES, lpriceES,  marker='o', color='y', s=lsizeES)
+    plt.scatter(ltimeEB, lpriceEB,  marker='o', color='b', s=lsizeEB)
+    plt.scatter(ltimeEP, lpriceEP, marker='o', color='k', s=lsizeEP)
 
     plt.title('Order Sell/Buy price evolution ' + day)
     plt.show()

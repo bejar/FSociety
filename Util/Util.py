@@ -20,6 +20,7 @@ Util
 __author__ = 'bejar'
 
 import time
+import numpy as np
 
 def now():
     print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
@@ -43,3 +44,17 @@ def nanoseconds_to_time(nnstime):
     seconds = rhours % 60
     return '{:02d}:{:02d}:{:02d}.{:03d}.{:03d}.{:03d}'.format(hours, minutes, seconds,
                                                                   mlseconds, mcseconds, nnseconds)
+
+def capped_prices(lprices):
+    """
+    List of prices without extreme values
+    :param lprices:
+    :return:
+    """
+    price_std = np.std(lprices)
+    price_mean = np.mean(lprices)
+    aprice = np.array(lprices)
+    aprice = aprice[np.logical_and(aprice > (price_mean - (price_std)),
+                                aprice < (price_mean + (price_std)))]
+
+    return aprice
