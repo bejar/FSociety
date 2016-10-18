@@ -35,7 +35,7 @@ pd.__version__ = '0.18'
 __author__ = 'bejar'
 
 if __name__ == '__main__':
-    stock = 'YHOO'
+    stock = 'RDS.B'
     day = ITCH_days[1]
     sorders = StockOrders()
     cpny = Company()
