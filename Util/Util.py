@@ -58,3 +58,15 @@ def capped_prices(lprices):
                                 aprice < (price_mean + (price_std)))]
 
     return aprice
+
+def hellinger_distance(m1, m2):
+    """
+    Bhattacharyya distance between two probability matrices/vectors
+    :param m1:
+    :param m2:
+    :return:
+    """
+    sum = 0.0
+    for a, b in zip(m1, m2):
+        sum += np.sum((np.sqrt(a) - np.sqrt(b)) ** 2)
+    return (1/np.sqrt(2)) * np.sqrt(sum)

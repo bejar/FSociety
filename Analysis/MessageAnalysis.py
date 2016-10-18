@@ -30,6 +30,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import gzip
 
 pd.__version__ = '0.18'
 
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     day = ITCH_days[0]
     sorders = StockOrders()
     cpny = Company()
-    rfile = open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv', 'r')
+    rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 
     lexecutionsS = []
     lexecutionsB = []

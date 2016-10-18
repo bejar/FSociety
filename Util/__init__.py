@@ -25,9 +25,10 @@ from .ITCHbin import ITCHv5
 from .ITCHRecord import ITCHRecord
 from .ITCHtime import ITCHtime
 from .MPI import MPI
-from .Util import now, nanoseconds_to_time, capped_prices
+from .Util import now, nanoseconds_to_time, capped_prices, hellinger_distance
 from .StockOrders import StockOrders
 from .Stock import Stock
 __all__ = ['Company', 'ITCH_files', 'NASDAQ_actions', 'datapath',
            'ITCHv5', 'TCHRecord', 'ITCHtime', 'Stock',
-           'MPI', 'now', 'StockOrders', 'ITCH_days', 'nanoseconds_to_time', 'capped_prices']
+           'MPI', 'now', 'StockOrders', 'ITCH_days', 'nanoseconds_to_time', 'capped_prices',
+           'hellinger_distance']
