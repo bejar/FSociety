@@ -43,7 +43,17 @@ def nanoseconds_to_time(nnstime):
     minutes = rhours // 60
     seconds = rhours % 60
     return '{:02d}:{:02d}:{:02d}.{:03d}.{:03d}.{:03d}'.format(hours, minutes, seconds,
+
                                                                   mlseconds, mcseconds, nnseconds)
+def time_to_nanoseconds(hour, minute=0):
+    """
+    Computes the nanoseconds for hour:minute
+    :param hour: 
+    :param minute: 
+    :return: 
+    """
+
+    return (hour * 60 + minute) * 60 * 1000 * 1000 * 1000
 
 def capped_prices(lprices):
     """

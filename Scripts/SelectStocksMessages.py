@@ -7,7 +7,7 @@ Stocks
 :Description: Stocks
 
     Selecciona los mensajes F/A/E/X/D/U/C que aparecen en un dia para las
-    compañias en el fichero 'stockselected.csv' (250 compañias con mas operaciones
+    companyias en el fichero 'stockselected.csv' (250 companyias con mas operaciones
     de compra/venta)
 
 :Authors: bejar
@@ -25,8 +25,6 @@ import pandas as pd
 
 from Util import ITCHv5, ITCHRecord, now, ITCH_files, datapath, StockOrders, ITCH_days
 
-pd.__version__ = '0.18'
-
 
 __author__ = 'bejar'
 
@@ -40,7 +38,7 @@ if __name__ == '__main__':
         sstocks.add(stock.strip())
     rfile.close()
 
-    for filename in ['07292016.NASDAQ_ITCH50.gz', '08302016.NASDAQ_ITCH50.gz']: #ITCH_files:
+    for filename in ['12302016.NASDAQ_ITCH50.gz']:  # ITCH_files:
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)
@@ -79,8 +77,8 @@ if __name__ == '__main__':
 
 
             if i == 1000000:
-                #itime = ITCHtime(g[3])
-                #print(i,  g[3], itime.to_string())
+                # itime = ITCHtime(g[3])
+                # print(i,  g[3], itime.to_string())
                 i = 0
                 wfile.flush()
             i += 1

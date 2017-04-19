@@ -35,7 +35,8 @@ pd.__version__ = '0.18'
 __author__ = 'bejar'
 
 if __name__ == '__main__':
-    stock = 'RDS.B'
+
+    stock = 'YHOO'
     day = ITCH_days[1]
     sorders = StockOrders()
     cpny = Company()
@@ -151,26 +152,46 @@ if __name__ == '__main__':
     ltimeDPS = np.array(ltimeDPS)
     lsizeDS = np.array(lsizeDS)
 
+    scale = '100s' #  'mcs' 'mls'
 
-    # cond = ldeleteBL < 6
+    dscale = {'mcs': (0,3),
+              'mls': (3,6),
+              'sec': (6,9),
+              '10s': (9,10),
+              '100s': (9,11),
+              '1000s': (11, 12),
+              '10000s': (13,15)
+    }
+
+
+    tscale = '10000s'
+
+    tscalemin, tscalemax  = dscale[tscale]
+
+    cond = ldeleteBL < tscalemax
     # plt.scatter(ltimeDB[cond], ltimeDPB[cond], color='r')
     # cond = np.logical_and(6 < ldeleteBL, ldeleteBL < 8)
     # plt.scatter(ltimeDB[cond], ltimeDPB[cond], color='m')
     # cond = np.logical_and(8 < ldeleteBL, ldeleteBL < 9)
     # plt.scatter(ltimeDB[cond], ltimeDPB[cond], color='y')
-
-    cond = ldeleteBL > 13
-    plt.scatter(ltimeDB[cond], ltimeDPB[cond], color='r')#, s=lsizeDB[cond])
-
+    #
+    # cond = ldeleteBL > tscalemin
+    # plt.scatter(ltimeDB[cond], ltimeDPB[cond], color='r')#, s=lsizeDB[cond])
+    #
     # cond = ldeleteSL < 6
     # plt.scatter(ltimeDS[cond], ltimeDPS[cond], color='b')
     # cond = np.logical_and(6 < ldeleteSL, ldeleteSL < 8)
     # plt.scatter(ltimeDS[cond], ltimeDPS[cond], color='c')
     # cond = np.logical_and(8 < ldeleteSL, ldeleteSL < 9)
     # plt.scatter(ltimeDS[cond], ltimeDPS[cond], color='k')
+    #
+    # cond = ldeleteSL > tscalemin
+    # plt.scatter(ltimeDS[cond], ltimeDPS[cond], color='b')#, s=lsizeDS[cond])
 
-    cond = ldeleteSL > 13
-    plt.scatter(ltimeDS[cond], ltimeDPS[cond], color='b')#, s=lsizeDS[cond])
+    cond = np.logical_and(tscalemin < ldeleteBL, ldeleteBL < tscalemax)
+    plt.scatter(ltimeDB[cond], ltimeDPB[cond], color='g')
+    cond = np.logical_and(tscalemin < ldeleteSL, ldeleteSL < tscalemax)
+    plt.scatter(ltimeDS[cond], ltimeDPS[cond], color='r')
 
     plt.scatter(ltimeEB, lpriceEB, color='r', marker='+', s=lsizeEB)
     plt.scatter(ltimeES, lpriceES, color='g', marker='+', s=lsizeES)
@@ -179,7 +200,7 @@ if __name__ == '__main__':
     plt.plot(ltimeES, lpriceES, color='g')
     plt.plot(ltimeEP, lpriceEP, color='k')
 
-    plt.title('Order Fast Deletions ' + day)
+    plt.title('Order Deletions timescale ' + tscale + ' D=' + day)
     plt.show()
     plt.close()
 

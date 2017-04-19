@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     sstocks = Stock()
 
-    for filename in ['07292016.NASDAQ_ITCH50.gz', '08302016.NASDAQ_ITCH50.gz']: #ITCH_files:
+    for filename in ['12302016.NASDAQ_ITCH50.gz']: #ITCH_files:
         dname = filename.split('.')[0]
         for stock in sstocks.get_list_stocks():
             print(dname, stock)

@@ -17,12 +17,13 @@ MessagesAnalysisData
 
 """
 
-from Util import  datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, Stock
+from Util import  datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, Stock, ITCHtime
 
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import gzip
 
 pd.__version__ = '0.18'
 
@@ -42,7 +43,7 @@ if __name__ == '__main__':
             print(day, stock, end='', flush=True)
             sorders = StockOrders()
 
-            rfile = open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv', 'r')
+            rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 
             lexecutionsS = []
             lexecutionsB = []
@@ -53,7 +54,7 @@ if __name__ == '__main__':
             norders = 0
             for mess in rfile:
                 data = mess.split(',')
-                timestamp = int(data[1].strip())
+                timestamp = ITCHtime(int(data[1].strip()))
                 order = data[2].strip()
                 ORN = data[3].strip()
                 if order in ['F', 'A']:
@@ -69,15 +70,15 @@ if __name__ == '__main__':
                 # Computes the time between placing and order and canceling it
                 if order == 'D':
                     trans = sorders.query_id(ORN)
-                    ldelete.append(timestamp - trans[1])
+                    ldelete.append(timestamp.itime - trans[1])
                     sorders.insert_order(stock, order, ORN)
                 # Computes the time between placing and order and its execution
                 if order in ['E', 'C']:
                     trans = sorders.query_id(ORN)
                     if trans[2] == 'S':
-                        lexecutionsS.append(timestamp - trans[1])
+                        lexecutionsS.append(timestamp.itime - trans[1])
                     else:
-                        lexecutionsB.append(timestamp - trans[1])
+                        lexecutionsB.append(timestamp.itime - trans[1])
                 i += 1
                 if i % 10000 == 0:
                     print('.', end='', flush=True)
