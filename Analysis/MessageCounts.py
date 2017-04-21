@@ -34,7 +34,7 @@ if __name__ == '__main__':
     cpny = Company()
 
     lcounts = {}
-    cnt = 0
+    counter = 0
     for stock in sstocks.get_list_stocks():
         lcounts[stock] = []
         for day in ITCH_days:
@@ -59,10 +59,12 @@ if __name__ == '__main__':
                 mincount = np.min(cnt)
             if np.max(cnt) > maxcount:
                 maxcount = np.max(cnt)
+        meancount = np.mean(lcounts[stock])
         if allsup:
             cp = cpny.get_company(stock)
             if cp is not None and cp[3] in ['NYSE', 'NASDAQ']:
-                print("{}, {}, {}, {}, {}, {:d}, {:d}".format(stock, cp[0], cp[1], cp[2], cp[3], int(mincount), int(maxcount)))
-                cnt += 1
-    print(cnt)
+                print("{}, {}, {}, {}, {}, {:d}, {:d}, {:d}".format(stock, cp[0], cp[1], cp[2], cp[3],
+                                                                    int(mincount), int(maxcount), int(meancount)))
+                counter += 1
+    print(counter)
 

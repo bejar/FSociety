@@ -29,9 +29,9 @@ class Stock:
 
         """
         if abs:
-            file = '../Data/stockselected.csv'
+            file = '../Data/stocksel.csv'
         else:
-            file = 'Data/stockselected.csv'
+            file = 'Data/stocksel.csv'
         rfile = open(file, 'r')
         self.sstocks = {}
         for stock in rfile:

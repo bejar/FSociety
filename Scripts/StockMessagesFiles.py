@@ -6,7 +6,7 @@ StockMessagesFiles
 
 :Description: StockMessagesFiles
 
-    Genera los ficheros con los mensajes de los stocks seleccionados
+    Genera los ficheros separados con los mensajes de los stocks seleccionados
 
 :Authors: bejar
     
