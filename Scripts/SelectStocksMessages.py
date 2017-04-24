@@ -31,14 +31,14 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
 
-    file = '../Data/stockselected.csv'
+    file = '../Data/stocksel.csv'
     rfile = open(file, 'r')
     sstocks = set()
     for stock in rfile:
         sstocks.add(stock.strip())
     rfile.close()
 
-    for filename in ['12302016.NASDAQ_ITCH50.gz']:  # ITCH_files:
+    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days['2015']]:  # ITCH_files:
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)
