@@ -24,8 +24,6 @@ __author__ = 'bejar'
 
 
 if __name__ == '__main__':
-
-
     sstocks = Stock()
 
     for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days['2015']]: #ITCH_files:

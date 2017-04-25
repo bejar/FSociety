@@ -6,7 +6,8 @@ MessageCounts
 
 :Description: MessageCounts
 
-    
+    Outputs the stocks in NYSE and NASDAQ that have more than 250 messages for each 10 minutes period for all the
+    days (available) of a year
 
 :Authors: bejar
     
@@ -37,7 +38,7 @@ if __name__ == '__main__':
     counter = 0
     for stock in sstocks.get_list_stocks():
         lcounts[stock] = []
-        for day in ITCH_days:
+        for day in ITCH_days['2015']:
             rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
             count = np.zeros(39)
             for mess in rfile:

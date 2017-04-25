@@ -38,7 +38,7 @@ if __name__ == '__main__':
         sstocks.add(stock.strip())
     rfile.close()
 
-    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days['2015']]:  # ITCH_files:
+    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days['2017']]:  # ITCH_files:
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)

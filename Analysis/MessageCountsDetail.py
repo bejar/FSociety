@@ -6,7 +6,7 @@ MessageCountsDetail
 
 :Description: MessageCountsDetail
 
-    
+  Detailed counted of messages for all the days (available) of a year    
 
 :Authors: bejar
     
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     messages = ['F', 'A', 'E', 'C', 'X', 'D', 'U', 'P']
     i_time = time_to_nanoseconds(9, 30)
     f_time = time_to_nanoseconds(16)
-    st_time = time_to_nanoseconds(0, 10)
+    # st_time = time_to_nanoseconds(0, 10)
 
     sstocks = Stock()
     cpny = Company()
@@ -41,19 +41,27 @@ if __name__ == '__main__':
     lcounts = {}
     totalcounts = {}
     for m in messages:
-        totalcounts[m] = np.zeros(len(ITCH_days), dtype=int)
+        totalcounts[m] = np.zeros(len(ITCH_days['2015']), dtype=int)
     for stock in sstocks.get_list_stocks():
         lcounts[stock] = {}
         for m in messages:
-            lcounts[stock][m] = np.zeros(len(ITCH_days), dtype=int)
-        for i, day in enumerate(ITCH_days):
-            rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
-            for mess in rfile:
-                data = mess.split(',')
-                order = data[2].strip()
-                timestamp = ITCHtime(int(data[1].strip()))
-                if i_time <= timestamp.itime < f_time:
-                   lcounts[stock][order][i] += 1
+            lcounts[stock][m] = np.zeros(len(ITCH_days['2015']), dtype=int)
+        for i, day in enumerate(ITCH_days['2015']):
+            print(stock, day)
+            try :
+                rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
+                for mess in rfile:
+                    try:
+                        data = mess.split(',')
+                        order = data[2].strip()
+                        timestamp = ITCHtime(int(data[1].strip()))
+                        if i_time <= timestamp.itime < f_time:
+                           lcounts[stock][order][i] += 1
+                    except IndexError:
+                        print(mess)
+            except FileNotFoundError:
+                pass
+
 
         cp = cpny.get_company(stock)
 
