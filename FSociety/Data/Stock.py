@@ -18,7 +18,7 @@ Class for representing a structure of stocks
 
 """
 
-from FSociety.Util import datapath
+from FSociety.Config import datapath
 
 __author__ = 'bejar'
 

@@ -16,7 +16,7 @@ MPIname
 :Created on: 18/07/2016 12:48 
 
 """
-from FSociety.Util import datapath
+from FSociety.Config import datapath
 
 __author__ = 'bejar'
 

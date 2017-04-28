@@ -17,7 +17,7 @@ Companies
 
 """
 
-from FSociety.Util import datapath
+from FSociety.Config import datapath
 
 __author__ = 'bejar'
 
