@@ -43,7 +43,7 @@ class StockOrders:
         :param bos:  Compra o venta (B/S)
         :param updid: Actualizacion del ID de la orden (para modificaciones)
         :param price: precio de la orden
-        :param size: Tamaño de la orden
+        :param size: Tamanyo de la orden
         :param order: Tipo de orden
         :param id: Identificador de la orden
         :return:

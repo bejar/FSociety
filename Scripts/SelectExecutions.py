@@ -17,20 +17,26 @@ Executions
 
 """
 
-from Util import  datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company
 
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
+from FSociety.Util import datapath, StockOrders, ITCH_days, Company
+import argparse
 
-pd.__version__ = '0.18'
 
 __author__ = 'bejar'
 
 if __name__ == '__main__':
-    stock = 'AAL'
-    day = ITCH_days[0]
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
+    parser.add_argument('--day', help="nuemro de dia del anyo a analizar", default=None)
+    parser.add_argument('--stock', help="Ticker a analizar", default=None)
+
+    args = parser.parse_args()
+    year = args.year
+    stock = args.stock
+    nday = int(args.day)
+
+    day = ITCH_days[year][nday]
     sorders = StockOrders()
     cpny = Company()
     rfile = open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv', 'r')

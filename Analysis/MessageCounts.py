@@ -17,11 +17,11 @@ MessageCounts
 :Created on: 19/04/2017 8:35 
 
 """
-from Util import datapath, StockOrders, ITCH_days,  nanoseconds_to_time, time_to_nanoseconds, Company, ITCHtime, Stock
 import gzip
+
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
+
+from FSociety.Util import datapath, ITCH_days, time_to_nanoseconds, Company, ITCHtime, Stock
 
 __author__ = 'bejar'
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     counter = 0
     for stock in sstocks.get_list_stocks():
         lcounts[stock] = []
-        for day in ITCH_days['2015']:
+        for day in ITCH_days['2016']:
             rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
             count = np.zeros(39)
             for mess in rfile:
@@ -55,12 +55,12 @@ if __name__ == '__main__':
         mincount = 10000000000000000000
         maxcount = 1
         for cnt in lcounts[stock]:
-            allsup = allsup and (np.sum(cnt > 250) == cnt.shape[0])
+            allsup = allsup and (np.sum(cnt > 600) == cnt.shape[0])
             if np.min(cnt) < mincount:
                 mincount = np.min(cnt)
             if np.max(cnt) > maxcount:
                 maxcount = np.max(cnt)
-        meancount = np.mean(lcounts[stock])
+        meancount = np.mean(np.array(lcounts[stock]))
         if allsup:
             cp = cpny.get_company(stock)
             if cp is not None and cp[3] in ['NYSE', 'NASDAQ']:

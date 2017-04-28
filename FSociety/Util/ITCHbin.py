@@ -5,7 +5,7 @@ It assumes their squirrelly binary message format.'''
 import gzip
 import struct
 
-from Util.utility import ManyWriters
+from FSociety.Util.utility import ManyWriters
 
 
 class ITCHv5:

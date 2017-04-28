@@ -17,20 +17,22 @@ Stocks
 
 """
 
+
+import argparse
+from FSociety.Util import ITCH_days, datapath, Company, ITCHRecord, ITCHtime, now, ITCHv5
+
 __author__ = 'bejar'
-
-import pandas as pd
-
-pd.__version__ = '0.18'
-
-from Util  import ITCH_files, datapath, Company, ITCHRecord, ITCHtime, now, ITCHv5
-__author__ = 'bejar'
-
 
 if __name__ == '__main__':
-    filename = ITCH_files[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
+
+    args = parser.parse_args()
+    year = args.year
+
+    filename = ITCH_days[year][2] + '.NASDAQ_ITCH50.gz'
     now()
-    i= 0
+    i = 0
 
     dataset = ITCHv5(datapath + filename)
 
@@ -56,10 +58,10 @@ if __name__ == '__main__':
             if not order in stockdic[stock]:
                 stockdic[stock][order] = 1
             else:
-                 stockdic[stock][order] += 1
+                stockdic[stock][order] += 1
         if i == 1000000:
             itime = ITCHtime(g[3])
-            print(i,  g[3], itime.to_string())
+            print(i, g[3], itime.to_string())
 
             i = 0
         i += 1
@@ -73,13 +75,12 @@ if __name__ == '__main__':
         cvalues = cmp.get_company(val.strip())
         sell = 0
         if 'S' in stockdic[val]:
-            sell =  stockdic[val]['S']
+            sell = stockdic[val]['S']
         buy = 0
         if 'B' in stockdic[val]:
             buy = stockdic[val]['B']
         if cvalues is not None:
-           wfile.write('%s, %d, %d, %s, %s\n' % (val.strip(), buy, sell,  cvalues[0],  cvalues[1]))
+            wfile.write('%s, %d, %d, %s, %s\n' % (val.strip(), buy, sell, cvalues[0], cvalues[1]))
         else:
             wfile.write('%s, %d, %d, None, None\n' % (val.strip(), buy, sell))
     wfile.close()
-

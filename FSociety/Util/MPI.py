@@ -16,6 +16,7 @@ MPIname
 :Created on: 18/07/2016 12:48 
 
 """
+from FSociety.Util import datapath
 
 __author__ = 'bejar'
 
@@ -30,7 +31,7 @@ class MPI():
         """
         dnames = {}
 
-        f = open('./Data/mpidlist.txt','r')
+        f = open(datapath + '/Data/mpidlist.txt','r')
 
         for line in f:
             reg = line.split('|')

@@ -24,13 +24,14 @@ MessageAnalysis
 
 """
 
-from Util import datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, ITCHtime, capped_prices
-
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 import gzip
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+from FSociety.Util import datapath, StockOrders, ITCH_days, nanoseconds_to_time, Company, ITCHtime, capped_prices
 
 pd.__version__ = '0.18'
 

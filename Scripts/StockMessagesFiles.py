@@ -17,18 +17,24 @@ StockMessagesFiles
 
 """
 
-from Util import datapath, ITCH_days, Stock
 import os
+import argparse
+from FSociety.Util import datapath, ITCH_days, Stock
 
 __author__ = 'bejar'
 
-
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
+
+    args = parser.parse_args()
+    year = args.year
+
     sstocks = Stock()
 
-    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days['2015']]: #ITCH_files:
+    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
         dname = filename.split('.')[0]
         for stock in sstocks.get_list_stocks():
             print(dname, stock)
-            os.system(' zcat ' + datapath + '/Results/' + dname +
-                      '-STOCK-MESSAGES-250.csv.gz |grep \'#'+stock+'\' > ' +datapath + '/Messages/' + dname + '-' + stock +'-MESSAGES.csv' )
+            os.system(' zcat ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv.gz |grep \'#'
+                      + stock + '#' + '\' > ' + datapath + '/Messages/' + dname + '-' + stock + '-MESSAGES.csv')

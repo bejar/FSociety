@@ -22,7 +22,7 @@ import pandas as pd
 pd.__version__ = '0.18'
 
 import numpy as np
-from Util import ITCH_files, datapath, NASDAQ_actions, ITCHtime, now, ITCHv5
+from FSociety.Util import ITCH_files, datapath, NASDAQ_actions, ITCHtime, now, ITCHv5
 
 __author__ = 'bejar'
 

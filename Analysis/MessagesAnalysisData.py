@@ -17,13 +17,12 @@ MessagesAnalysisData
 
 """
 
-from Util import  datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, Stock, ITCHtime
-
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 import gzip
+
+import numpy as np
+import pandas as pd
+
+from FSociety.Util import datapath, StockOrders, ITCH_days, Company, Stock, ITCHtime
 
 pd.__version__ = '0.18'
 

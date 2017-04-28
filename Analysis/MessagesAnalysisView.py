@@ -18,11 +18,12 @@ MessagesAnalysisView
 
 """
 
-import pandas as pd
-from Util import  datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, Stock
-import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
+
+from FSociety.Util import datapath
 
 __author__ = 'bejar'
 

@@ -18,20 +18,22 @@ Class for representing a structure of stocks
 
 """
 
+from FSociety.Util import datapath
+
 __author__ = 'bejar'
 
 
 class Stock:
 
     sstock = None
-    def __init__(self, abs=True):
+
+    def __init__(self):
         """
 
         """
-        if abs:
-            file = '../Data/stocksel.csv'
-        else:
-            file = 'Data/stocksel.csv'
+
+        file = datapath + '/Data/stockselected.csv'
+
         rfile = open(file, 'r')
         self.sstocks = {}
         for stock in rfile:
@@ -43,4 +45,4 @@ class Stock:
 
         :return:
         """
-        return self.sstocks.keys()
+        return sorted(self.sstocks.keys())

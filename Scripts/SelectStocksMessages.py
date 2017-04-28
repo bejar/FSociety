@@ -19,26 +19,22 @@ Stocks
 
 """
 
+import argparse
 
-
-import pandas as pd
-
-from Util import ITCHv5, ITCHRecord, now, ITCH_files, datapath, StockOrders, ITCH_days
-
+from FSociety.Util import ITCHv5, ITCHRecord, now, datapath, StockOrders, ITCH_days, Stock, ITCHtime
 
 __author__ = 'bejar'
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
 
-    file = '../Data/stocksel.csv'
-    rfile = open(file, 'r')
-    sstocks = set()
-    for stock in rfile:
-        sstocks.add(stock.strip())
-    rfile.close()
+    args = parser.parse_args()
+    year = args.year
+    sstocks = Stock()
 
-    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days['2017']]:  # ITCH_files:
+    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)
@@ -52,17 +48,17 @@ if __name__ == '__main__':
             order = dataset.to_string(g[0])
             if order in ['F', 'A']:
                 stock = dataset.to_string(g[7]).strip()
-                if stock in sstocks:
+                if stock in sstocks.sstocks:
                     record = ITCHRecord(g)
                     sorders.insert_order(stock, order, record.ORN, record.timestamp)
-                    wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
+                    wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
 
             if order in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)
                 stock = sorders.query_id(record.ORN)
                 if stock is not None:
                     stock = stock[0]
-                    if stock in sstocks:
+                    if stock in sstocks.sstocks:
                         wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
                         if order == 'U':
                             sorders.insert_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp, price=record.price)
@@ -72,7 +68,7 @@ if __name__ == '__main__':
             if order in ['P']:
                 record = ITCHRecord(g)
                 stock = record.stock
-                if stock is not None and stock in sstocks:
+                if stock is not None and stock in sstocks.sstocks:
                     wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
 
 

@@ -16,18 +16,14 @@ StockSimilarity
 :Created on: 06/10/2016 11:24 
 
 """
-from Util import datapath, StockOrders, ITCH_days,  nanoseconds_to_time, Company, ITCHtime, capped_prices, Stock, hellinger_distance
-
-import pandas as pd
-import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.manifold import MDS, SpectralEmbedding
+import numpy as np
+import pandas as pd
+from sklearn.manifold import SpectralEmbedding
+
+from FSociety.Util import datapath, StockOrders, ITCH_days, Company, ITCHtime, Stock, hellinger_distance
 
 pd.__version__ = '0.18'
-
-from mpl_toolkits.mplot3d import Axes3D
-
 
 __author__ = 'bejar'
 

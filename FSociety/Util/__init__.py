@@ -19,7 +19,7 @@ __init__.py
 
 __author__ = 'bejar'
 
-from .Constants import ITCH_files, datapath, NASDAQ_actions, ITCH_days
+from .Constants import datapath, NASDAQ_actions, ITCH_days
 from .Company import Company
 from .ITCHbin import ITCHv5
 from .ITCHRecord import ITCHRecord
@@ -28,7 +28,8 @@ from .MPI import MPI
 from .Util import now, nanoseconds_to_time, capped_prices, hellinger_distance, time_to_nanoseconds
 from .StockOrders import StockOrders
 from .Stock import Stock
-__all__ = ['Company', 'ITCH_files', 'NASDAQ_actions', 'datapath',
-           'ITCHv5', 'TCHRecord', 'ITCHtime', 'Stock',
+
+__all__ = ['Company', 'NASDAQ_actions', 'datapath',
+           'ITCHv5', 'ITCHRecord', 'ITCHtime', 'Stock',
            'MPI', 'now', 'StockOrders', 'ITCH_days', 'nanoseconds_to_time', 'capped_prices',
            'hellinger_distance', 'time_to_nanoseconds']

@@ -17,6 +17,8 @@ Companies
 
 """
 
+from FSociety.Util import datapath
+
 __author__ = 'bejar'
 
 
@@ -24,15 +26,14 @@ class Company:
 
     cnames = {}
 
-    def __init__(self, abs=True):
+    def __init__(self):
         """
         Reads the companies from a file and stores it in a dictionary
         """
 
-        if abs:
-            f = open('../Data/companylist.csv', 'r')
-        else:
-            f = open('Data/companylist.csv', 'r')
+
+        f = open(datapath + '/Data/companylist.csv', 'r')
+
 
         for line in f:
             reg = line.split(',')

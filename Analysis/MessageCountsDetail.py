@@ -20,11 +20,11 @@ MessageCountsDetail
 __author__ = 'bejar'
 
 
-from Util import datapath, StockOrders, ITCH_days,  NASDAQ_actions, time_to_nanoseconds, Company, ITCHtime, Stock
 import gzip
+
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
+
+from FSociety.Util import datapath, ITCH_days, NASDAQ_actions, time_to_nanoseconds, Company, ITCHtime, Stock
 
 __author__ = 'bejar'
 
