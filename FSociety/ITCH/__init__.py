@@ -18,7 +18,7 @@ __init__.py
 """
 
 from .ITCHbin import ITCHv5
-from ITCHRecord import ITCHRecord
+from .ITCHRecord import ITCHRecord
 from .ITCHtime import ITCHtime
 
 __author__ = 'bejar'
