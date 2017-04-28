@@ -19,7 +19,8 @@ StockMessagesFiles
 
 import os
 import argparse
-from FSociety.Util import datapath, ITCH_days, Stock
+from FSociety.Config import datapath, ITCH_days
+from FSociety.Data import Stock
 
 __author__ = 'bejar'
 

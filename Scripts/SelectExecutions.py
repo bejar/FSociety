@@ -17,8 +17,8 @@ Executions
 
 """
 
-
-from FSociety.Util import datapath, StockOrders, ITCH_days, Company
+from FSociety.Data import Company, StockOrders
+from FSociety.Config import datapath, ITCH_days
 import argparse
 
 

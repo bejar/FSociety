@@ -6,7 +6,7 @@ Stocks
 
 :Description: Stocks
 
-    Genera una lista del numero de mensajes de venta/compra que aparecen en un dia para cada compañia
+    Genera una lista del numero de mensajes de venta/compra que aparecen en un dia para cada companyia
 
 :Authors: bejar
     
@@ -19,7 +19,11 @@ Stocks
 
 
 import argparse
-from FSociety.Util import ITCH_days, datapath, Company, ITCHRecord, ITCHtime, now, ITCHv5
+from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
+from FSociety.Util import now
+from FSociety.Data import Company
+from FSociety.Config import datapath, ITCH_days
+
 
 __author__ = 'bejar'
 

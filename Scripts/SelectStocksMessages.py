@@ -21,7 +21,10 @@ Stocks
 
 import argparse
 
-from FSociety.Util import ITCHv5, ITCHRecord, now, datapath, StockOrders, ITCH_days, Stock, ITCHtime
+from FSociety.ITCH import ITCHv5, ITCHRecord
+from FSociety.Util import now
+from FSociety.Data import Stock, StockOrders
+from FSociety.Config import datapath, ITCH_days
 
 __author__ = 'bejar'
 

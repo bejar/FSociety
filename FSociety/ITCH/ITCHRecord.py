@@ -16,7 +16,7 @@ ITCHRecord
 :Created on: 26/09/2016 8:12 
 
 """
-from FSociety.Util.ITCHtime import ITCHtime
+from FSociety.ITCH.ITCHtime import ITCHtime
 
 __author__ = 'bejar'
 
