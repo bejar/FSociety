@@ -17,18 +17,26 @@ MessageCountsDetail
 
 """
 
-__author__ = 'bejar'
 
 
 import gzip
 
 import numpy as np
+import argparse
 
-from FSociety.Util import datapath, ITCH_days, NASDAQ_actions, time_to_nanoseconds, Company, ITCHtime, Stock
+from FSociety.Util import now, time_to_nanoseconds
+from FSociety.Data import Stock, Company
+from FSociety.Config import datapath, ITCH_days
+from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
 
 __author__ = 'bejar'
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
+
+    args = parser.parse_args()
+    year = args.year
 
     messages = ['F', 'A', 'E', 'C', 'X', 'D', 'U', 'P']
     i_time = time_to_nanoseconds(9, 30)
@@ -41,11 +49,11 @@ if __name__ == '__main__':
     lcounts = {}
     totalcounts = {}
     for m in messages:
-        totalcounts[m] = np.zeros(len(ITCH_days['2015']), dtype=int)
+        totalcounts[m] = np.zeros(len(ITCH_days[year]), dtype=int)
     for stock in sstocks.get_list_stocks():
         lcounts[stock] = {}
         for m in messages:
-            lcounts[stock][m] = np.zeros(len(ITCH_days['2015']), dtype=int)
+            lcounts[stock][m] = np.zeros(len(ITCH_days[year]), dtype=int)
         for i, day in enumerate(ITCH_days['2015']):
             print(stock, day)
             try :

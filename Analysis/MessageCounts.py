@@ -20,13 +20,20 @@ MessageCounts
 import gzip
 
 import numpy as np
+import argparse
 
-from FSociety.Util import datapath, ITCH_days, time_to_nanoseconds, Company, ITCHtime, Stock
+from FSociety.Util import now, time_to_nanoseconds
+from FSociety.Data import Stock, Company
+from FSociety.Config import datapath, ITCH_days
 
 __author__ = 'bejar'
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
 
+    args = parser.parse_args()
+    year = args.year
     i_time = time_to_nanoseconds(9, 30)
     f_time = time_to_nanoseconds(16)
     st_time = time_to_nanoseconds(0, 10)
@@ -38,7 +45,7 @@ if __name__ == '__main__':
     counter = 0
     for stock in sstocks.get_list_stocks():
         lcounts[stock] = []
-        for day in ITCH_days['2016']:
+        for day in ITCH_days[year]:
             rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
             count = np.zeros(39)
             for mess in rfile:
