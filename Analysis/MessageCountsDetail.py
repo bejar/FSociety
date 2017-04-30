@@ -26,7 +26,7 @@ import argparse
 
 from FSociety.Util import time_to_nanoseconds
 from FSociety.Data import Stock, Company
-from FSociety.Config import datapath, ITCH_days
+from FSociety.Config import datapath, ITCH_days, NASDAQ_actions
 from FSociety.ITCH import ITCHtime
 
 __author__ = 'bejar'
