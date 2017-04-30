@@ -22,9 +22,10 @@ import gzip
 import numpy as np
 import argparse
 
-from FSociety.Util import now, time_to_nanoseconds
+from FSociety.Util import time_to_nanoseconds
 from FSociety.Data import Stock, Company
 from FSociety.Config import datapath, ITCH_days
+from FSociety.ITCH import ITCHtime
 
 __author__ = 'bejar'
 
