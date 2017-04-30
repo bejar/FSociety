@@ -54,8 +54,7 @@ if __name__ == '__main__':
         lcounts[stock] = {}
         for m in messages:
             lcounts[stock][m] = np.zeros(len(ITCH_days[year]), dtype=int)
-        for i, day in enumerate(ITCH_days['2015']):
-            print(stock, day)
+        for i, day in enumerate(ITCH_days[year]):
             try :
                 rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
                 for mess in rfile:
