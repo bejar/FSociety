@@ -17,18 +17,32 @@ MessagesAnalysisData
 
 """
 
+import argparse
+
 import gzip
 
 import numpy as np
-import pandas as pd
 
-from FSociety.Util import datapath, StockOrders, ITCH_days, Company, Stock, ITCHtime
 
-pd.__version__ = '0.18'
+from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
+from FSociety.Util import now
+from FSociety.Data import Stock, StockOrders, Company
+from FSociety.Config import datapath, ITCH_days
+
 
 __author__ = 'bejar'
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
+
+    args = parser.parse_args()
+    year = str(args.year)
+    sstocks = Stock()
+
+    if year is None:
+        year = '2015'
 
     sstock = Stock()
     cpny = Company()
@@ -37,8 +51,7 @@ if __name__ == '__main__':
                 'N Order Executions Buy,Mean time to execution,Max time to execution,Min time to execution,'
                 'N Order deletions,Mean time to deletion,Max time to deletion,Min time to deletion\n')
     for stock in sorted(sstock.get_list_stocks()):
-        for fday in range(len(ITCH_days)):
-            day = ITCH_days[fday]
+        for day in ITCH_days[year]:
             print(day, stock, end='', flush=True)
             sorders = StockOrders()
 

@@ -16,21 +16,35 @@ StockSimilarity
 :Created on: 06/10/2016 11:24 
 
 """
+import argparse
+
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from sklearn.manifold import SpectralEmbedding
 
-from FSociety.Util import datapath, StockOrders, ITCH_days, Company, ITCHtime, Stock, hellinger_distance
+from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
+from FSociety.Util import now, hellinger_distance
+from FSociety.Data import Stock, StockOrders, Company
+from FSociety.Config import datapath, ITCH_days
 
-pd.__version__ = '0.18'
+
 
 __author__ = 'bejar'
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default=None)
+
+    args = parser.parse_args()
+    year = str(args.year)
+    sstocks = Stock()
+
+    if year is None:
+        year = '2015'
+
     sstock = Stock()
     cpny = Company()
-    day = ITCH_days[0]
+    day = ITCH_days[year][0]
     dhistoD = {}
     dhistoS = {}
     dhistoB = {}

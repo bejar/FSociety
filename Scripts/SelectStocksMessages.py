@@ -31,11 +31,14 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Anyo del analisis", default=None)
+    parser.add_argument('--year', help="Anyo del analisis", default='')
 
     args = parser.parse_args()
-    year = args.year
+    year = str(args.year)
     sstocks = Stock()
+
+    if year == '':
+        year = '2016'
 
     for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
         now()
@@ -62,7 +65,7 @@ if __name__ == '__main__':
                 if stock is not None:
                     stock = stock[0]
                     if stock in sstocks.sstocks:
-                        wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
+                        wfile.write('#%s#, %s\n'%(stock.strip(), record.to_string()))
                         if order == 'U':
                             sorders.insert_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp, price=record.price)
                         if order == 'D':
@@ -72,7 +75,7 @@ if __name__ == '__main__':
                 record = ITCHRecord(g)
                 stock = record.stock
                 if stock is not None and stock in sstocks.sstocks:
-                    wfile.write('#%s, %s\n'%(stock.strip(), record.to_string()))
+                    wfile.write('#%s#, %s\n'%(stock.strip(), record.to_string()))
 
 
             if i == 1000000:

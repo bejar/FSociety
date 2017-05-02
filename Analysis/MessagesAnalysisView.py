@@ -23,7 +23,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from FSociety.Util import datapath
+from FSociety.Config import datapath
 
 __author__ = 'bejar'
 

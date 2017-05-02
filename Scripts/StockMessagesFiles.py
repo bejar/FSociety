@@ -29,7 +29,9 @@ if __name__ == '__main__':
     parser.add_argument('--year', help="Anyo del analisis", default=None)
 
     args = parser.parse_args()
-    year = args.year
+    year = str(args.year)
+    if year is None:
+        year = '2015'
 
     sstocks = Stock()
 

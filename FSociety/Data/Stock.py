@@ -27,12 +27,15 @@ class Stock:
 
     sstock = None
 
-    def __init__(self):
+    def __init__(self, fast=False):
         """
 
         """
 
-        file = datapath + '/Data/stockselected.csv'
+        if fast:
+            file = datapath + '/Data/stockfast.csv'
+        else:
+            file = datapath + '/Data/stockselected.csv'
 
         rfile = open(file, 'r')
         self.sstocks = {}

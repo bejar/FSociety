@@ -34,7 +34,11 @@ if __name__ == '__main__':
     parser.add_argument('--year', help="Anyo del analisis", default=None)
 
     args = parser.parse_args()
-    year = args.year
+    year = str(args.year)
+
+    if year is None:
+        year = '2015'
+
     i_time = time_to_nanoseconds(9, 30)
     f_time = time_to_nanoseconds(16)
     st_time = time_to_nanoseconds(0, 10)
