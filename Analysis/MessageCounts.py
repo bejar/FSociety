@@ -31,12 +31,12 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Anyo del analisis", default=None)
+    parser.add_argument('--year', help="Anyo del analisis", default="")
 
     args = parser.parse_args()
     year = str(args.year)
 
-    if year is None:
+    if year == '':
         year = '2015'
 
     i_time = time_to_nanoseconds(9, 30)
