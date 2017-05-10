@@ -39,7 +39,7 @@ if __name__ == '__main__':
     year = str(args.year)
 
     if year == '':
-        year = '2016'
+        year = '2015'
 
     messages = ['F', 'A', 'E', 'C', 'X', 'D', 'U', 'P']
     i_time = time_to_nanoseconds(9, 30)
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         cp = cpny.get_company(stock)
 
         for m in messages:
-            print('{}, {}, {}, {:d}, {:d}, {:d} {:3.2f}'.format(stock, m, NASDAQ_actions[m], np.min(lcounts[stock][m]),
+            print('{}, {}, {}, {:d}, {:d}, {:d}, {:3.2f}'.format(stock, m, NASDAQ_actions[m], np.min(lcounts[stock][m]),
                                                         np.max(lcounts[stock][m]), int(np.mean(lcounts[stock][m])),
                                                         np.std(lcounts[stock][m])
                                                         )
@@ -88,5 +88,8 @@ if __name__ == '__main__':
     print('TOTALS')
 
     for m in messages:
-        print('{}, {}, {:d}, {:d}, {:d}'.format(m, NASDAQ_actions[m], np.min(totalcounts[m]),
-                                                np.max(totalcounts[m]), int(np.mean(totalcounts[m])) ) )
+        print('{}, {}, {:d}, {:d}, {:d}, {:3.2f}'.format(m, NASDAQ_actions[m], np.min(totalcounts[m]),
+                                                np.max(totalcounts[m]), int(np.mean(totalcounts[m])),
+                                                        np.std(totalcounts[m])
+                                                        )
+              )
