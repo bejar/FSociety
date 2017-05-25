@@ -39,7 +39,7 @@ if __name__ == '__main__':
     year = str(args.year)
 
     if year == '':
-        year = '2015'
+        year = '2016'
 
     messages = ['F', 'A', 'E', 'C', 'X', 'D', 'U', 'P']
     i_time = time_to_nanoseconds(9, 30)
