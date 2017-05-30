@@ -26,11 +26,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from FSociety.Util import datapath, StockOrders, ITCH_days, Company, ITCHtime
-
-pd.__version__ = '0.18'
-
-
+from FSociety.Config import datapath, ITCH_days
+from FSociety.Data import Company, StockOrders
+from FSociety.ITCH import ITCHtime
 
 __author__ = 'bejar'
 
@@ -140,7 +138,7 @@ if __name__ == '__main__':
 
         i += 1
         if i % 10000 == 0:
-            print('.', end='', flush=True)
+            print('.')
 
     ldeleteBL = np.log10(ldeleteB)
     ldeleteSL = np.log10(ldeleteS)

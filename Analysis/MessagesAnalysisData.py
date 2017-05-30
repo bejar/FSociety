@@ -52,7 +52,7 @@ if __name__ == '__main__':
                 'N Order deletions,Mean time to deletion,Max time to deletion,Min time to deletion\n')
     for stock in sorted(sstock.get_list_stocks()):
         for day in ITCH_days[year]:
-            print(day, stock, end='', flush=True)
+            print(day, stock)
             sorders = StockOrders()
 
             rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                         lexecutionsB.append(timestamp.itime - trans[1])
                 i += 1
                 if i % 10000 == 0:
-                    print('.', end='', flush=True)
+                    print('.')
                     wfile.flush()
 
             if len(lexecutionsB) != 0 and len(lexecutionsS) != 0:
