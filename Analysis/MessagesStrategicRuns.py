@@ -72,7 +72,7 @@ if __name__ == '__main__':
     year = str(args.year)
 
     if year == '':
-        year = '2015'
+        year = '2016'
 
     i_time = time_to_nanoseconds(9, 30)
     f_time = time_to_nanoseconds(16)
@@ -214,3 +214,4 @@ if __name__ == '__main__':
         print('{:3d} '.format(i), end='')
         for day in ITCH_days[year]:
             print('{:6d} {:6d} {:6d} '.format(aggrday[day][0][i], aggrday[day][1][i], aggrday[day][2][i]), end='')
+        print()
