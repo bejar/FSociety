@@ -53,10 +53,10 @@ def compute_counts(lc):
     vcount = np.zeros(101, dtype=int)
     c = Counter(lc)
 
-    for v in range(3,100):
-        vcount[v]= c[v]
+    for v in range(3, 100):
+        vcount[v] = c[v]
 
-    lesscommon = c.most_common()[-1][0]
+    lesscommon = sorted([v for v in c])[-1]
     if lesscommon >= 100:
         for v in range(100, lesscommon+1):
             vcount[100] += c[v]
@@ -78,7 +78,6 @@ if __name__ == '__main__':
     f_time = time_to_nanoseconds(16)
 
     sstock = Stock(fast=True)
-
 
     mgap = 1e+8
     detail = {}
@@ -205,8 +204,9 @@ if __name__ == '__main__':
 
     for stock in sorted(sstock.get_list_stocks()):
         print('{:5s} '.format(stock), end='')
-        for day in ITCH_days[year]:
-            print('{:7d} '.format(detail[stock][day]), end='')
+        # for day in ITCH_days[year]:
+        for day in [ITCH_days[year][2]]:
+                print('{:7d} '.format(detail[stock][day]), end='')
         print()
 
     print()
