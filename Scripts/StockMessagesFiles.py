@@ -35,9 +35,10 @@ if __name__ == '__main__':
 
     sstocks = Stock()
 
-    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
+    # for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
+    for filename in ['S021317-v50.txt.gz']:
         dname = filename.split('.')[0]
         for stock in sstocks.get_list_stocks():
             print(dname, stock)
-            os.system(' zcat ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv.gz |grep \'#'
-                      + stock + '#' + '\' > ' + datapath + '/Messages/' + dname + '-' + stock + '-MESSAGES.csv')
+            os.system(' zcat ' + datapath + '/GIS/Results/' + dname + '-STOCK-MESSAGES-250.csv.gz |grep \'#'
+                      + stock + '#' + '\' > ' + datapath + '/GIS/Messages/' + dname + '-' + stock + '-MESSAGES.csv')

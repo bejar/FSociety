@@ -38,17 +38,23 @@ if __name__ == '__main__':
     sstocks = Stock()
 
     if year == '':
-        year = '2016'
+        year = '2017A'
 
-    for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
+    if 'A' in year:
+        lfiles = ['/GIS/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
+    else:
+        lfiles = [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
+
+    #for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
+    for filename, dname in zip(lfiles,ITCH_days[year]):
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)
         gendata = dataset.records()
         stockdic = {}
         print(filename)
-        dname = filename.split('.')[0]
-        wfile = open(datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv', 'w')
+        #dname = filename.split('.')[0]
+        wfile = open(datapath + 'GIS/Results/' + dname + '-STOCK-MESSAGES-250.csv', 'w')
         sorders = StockOrders()
         for g in gendata:
             order = dataset.to_string(g[0])

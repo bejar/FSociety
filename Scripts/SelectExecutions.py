@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', help="Anyo del analisis", default=None)
-    parser.add_argument('--day', help="nuemro de dia del anyo a analizar", default=None)
+    parser.add_argument('--day', help="numero de dia del anyo a analizar", default=None)
     parser.add_argument('--stock', help="Ticker a analizar", default=None)
 
     args = parser.parse_args()
