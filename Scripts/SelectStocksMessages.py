@@ -20,6 +20,7 @@ Stocks
 """
 
 import argparse
+import os
 
 from FSociety.ITCH import ITCHv5, ITCHRecord
 from FSociety.Util import now
@@ -27,7 +28,6 @@ from FSociety.Data import Stock, StockOrders
 from FSociety.Config import datapath, ITCH_days
 
 __author__ = 'bejar'
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -41,20 +41,21 @@ if __name__ == '__main__':
         year = '2017A'
 
     if 'A' in year:
-        lfiles = ['/GIS/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
+        lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
+        datapath = datapath + '/GIS/'
     else:
         lfiles = [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
 
-    #for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
-    for filename, dname in zip(lfiles,ITCH_days[year]):
+    # for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
+    for filename, dname in zip(lfiles, ITCH_days[year]):
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)
         gendata = dataset.records()
         stockdic = {}
         print(filename)
-        #dname = filename.split('.')[0]
-        wfile = open(datapath + 'GIS/Results/' + dname + '-STOCK-MESSAGES-250.csv', 'w')
+        # dname = filename.split('.')[0]
+        wfile = open(datapath + 'Results/' + dname + '-STOCK-MESSAGES-250.csv', 'w')
         sorders = StockOrders()
         for g in gendata:
             order = dataset.to_string(g[0])
@@ -71,9 +72,10 @@ if __name__ == '__main__':
                 if stock is not None:
                     stock = stock[0]
                     if stock in sstocks.sstocks:
-                        wfile.write('#%s#, %s\n'%(stock.strip(), record.to_string()))
+                        wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
                         if order == 'U':
-                            sorders.insert_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp, price=record.price)
+                            sorders.insert_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp,
+                                                 price=record.price)
                         if order == 'D':
                             sorders.insert_order(stock, order, record.ORN)
 
@@ -81,8 +83,7 @@ if __name__ == '__main__':
                 record = ITCHRecord(g)
                 stock = record.stock
                 if stock is not None and stock in sstocks.sstocks:
-                    wfile.write('#%s#, %s\n'%(stock.strip(), record.to_string()))
-
+                    wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
 
             if i == 1000000:
                 # itime = ITCHtime(g[3])
@@ -91,6 +92,9 @@ if __name__ == '__main__':
                 wfile.flush()
             i += 1
         now()
-
         wfile.close()
-
+        os.system(' gzip ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv')
+        for stock in sstocks.get_list_stocks():
+            print(dname, stock)
+            os.system(' zcat ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv.gz |grep \'#'
+                      + stock + '#' + '\' > ' + datapath + '/Messages/' + dname + '-' + stock + '-MESSAGES.csv')
