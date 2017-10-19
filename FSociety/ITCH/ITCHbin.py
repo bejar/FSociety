@@ -97,10 +97,14 @@ class ITCHv5:
         This is why people don't like Python 3
         '''
         try:
-            return b.decode('ascii')
+            return b.decode('ascii', "ignore")
         except AttributeError:
             print('Attribute Error')
             return str(b)
+        except UnicodeDecodeError:
+            print('Unicode Error')
+            return str(b)
+
 
     def print_records(self):
         '''This could be redefined to get what kind of output you like'''
