@@ -73,7 +73,7 @@ class ITCHv5:
 
                     try:
                         fmt = self.rec_types[rec[0]]
-                        unpacked_rec = list( struct.unpack(fmt, rec) )
+                        unpacked_rec = list(struct.unpack(fmt, rec))
 
                         # This unpacks that annoying 6-byte int timestamp that
                         # struct can't handle (maybe we should be using numpy?)
@@ -87,6 +87,9 @@ class ITCHv5:
                         pass
                     except struct.error as e:
                         break
+
+                except ValueError:
+                    break
                 except struct.error as e:
                     break
 
@@ -97,7 +100,7 @@ class ITCHv5:
         This is why people don't like Python 3
         '''
         try:
-            return b.decode('ascii', "ignore")
+            return b.decode('ascii', "replace")
         except AttributeError:
             print('Attribute Error')
             return str(b)
