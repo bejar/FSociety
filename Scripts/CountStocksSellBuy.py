@@ -42,8 +42,6 @@ if __name__ == '__main__':
         lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
         datapath = datapath + '/GIS/'
 
-    filename = ITCH_days[year][2] + '.NASDAQ_ITCH50.gz'
-
     for filename, dname in zip(lfiles, ITCH_days[year]):
         now()
         i = 0
@@ -82,7 +80,6 @@ if __name__ == '__main__':
 
         cmp = Company()
 
-        dname = filename.split('.')[0]
         wfile = open(datapath + '/Results/' + dname + '-STOCK-ACTIVITY.csv', 'w')
         for val in stockdic:
             cvalues = cmp.get_company(val.strip())
