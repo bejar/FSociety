@@ -38,9 +38,9 @@ if __name__ == '__main__':
     sstocks = Stock()
 
     if year == '':
-        year = '2017A'
+        year = '2017G'
 
-    if 'A' in year:
+    if 'G' in year:
         lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
         datapath = datapath + '/GIS/'
     else:
