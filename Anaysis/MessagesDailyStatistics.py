@@ -6,7 +6,9 @@ MessagesAnalysisData
 
 :Description: MessagesAnalysisData
 
-    
+    Computes diverse statistics from the messages [Buy, Sell, Delete, Execution] of a day for a set of stocks
+
+
 
 :Authors: bejar
     
@@ -35,16 +37,22 @@ __author__ = 'bejar'
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Anyo del analisis", default=None)
+    parser.add_argument('--year', help="Anyo del analisis", default='')
 
     args = parser.parse_args()
     year = str(args.year)
     sstocks = Stock()
 
-    if year is None:
-        year = '2015'
+    if year == '':
+        year = '2017G'
 
-    sstock = Stock()
+    if 'G' in year:
+        lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
+        datapath = datapath + '/GIS/'
+    else:
+        lfiles = [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
+
+    sstock = Stock(num=50)
     cpny = Company()
     wfile = open(datapath + '/Results/MessagesStats.csv', 'w')
     wfile.write('Day,Stock,N Buy/Sell orders,N Order Executions Sell,Mean time to execution,Max time to execution,Min time to execution,'
@@ -60,7 +68,6 @@ if __name__ == '__main__':
             lexecutionsS = []
             lexecutionsB = []
             ldelete = []
-
 
             i = 0
             norders = 0
@@ -93,7 +100,7 @@ if __name__ == '__main__':
                         lexecutionsB.append(timestamp.itime - trans[1])
                 i += 1
                 if i % 10000 == 0:
-                    print('.')
+                    print('.', end='')
                     wfile.flush()
 
             if len(lexecutionsB) != 0 and len(lexecutionsS) != 0:

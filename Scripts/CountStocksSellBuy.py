@@ -54,28 +54,31 @@ if __name__ == '__main__':
 
         print(filename)
         for g in gendata:
-            record = ITCHRecord(g)
-            action = dataset.to_string(g[0])
+            try:
+                record = ITCHRecord(g)
+                action = dataset.to_string(g[0])
 
-            # if action in ['A', 'F', 'E', 'C', 'X', 'D', 'U', 'P']:
-            #     print(record.to_string())
+                # if action in ['A', 'F', 'E', 'C', 'X', 'D', 'U', 'P']:
+                #     print(record.to_string())
 
-            if action in ['F', 'A']:
-                stock = dataset.to_string(g[7])
-                order = dataset.to_string(g[5])
+                if action in ['F', 'A']:
+                    stock = dataset.to_string(g[7])
+                    order = dataset.to_string(g[5])
 
-                if not stock in stockdic:
-                    stockdic[stock] = {}
-                if not order in stockdic[stock]:
-                    stockdic[stock][order] = 1
-                else:
-                    stockdic[stock][order] += 1
-            if i == 1000000:
-                itime = ITCHtime(g[3])
-                print(i, g[3], itime.to_string())
+                    if not stock in stockdic:
+                        stockdic[stock] = {}
+                    if not order in stockdic[stock]:
+                        stockdic[stock][order] = 1
+                    else:
+                        stockdic[stock][order] += 1
+                if i == 1000000:
+                    itime = ITCHtime(g[3])
+                    print(i, g[3], itime.to_string())
 
-                i = 0
-            i += 1
+                    i = 0
+                i += 1
+            except Exception:
+                break
         now()
 
         cmp = Company()

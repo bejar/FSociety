@@ -27,7 +27,7 @@ class Stock:
 
     sstock = None
 
-    def __init__(self, fast=False):
+    def __init__(self, fast=False, num=100):
         """
 
         """
@@ -35,12 +35,15 @@ class Stock:
         if fast:
             file = datapath + '/Data/stockfast.csv'
         else:
-            file = datapath + '/Data/stockselected.csv'
+            file = datapath + '/Data/stockmonth.csv'
 
         rfile = open(file, 'r')
         self.sstocks = {}
+        i = 0
         for stock in rfile:
             self.sstocks[stock.strip()] = ''
+            i += 1
+            if i > num: break
         rfile.close()
 
     def get_list_stocks(self):

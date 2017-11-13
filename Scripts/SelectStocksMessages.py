@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     year = str(args.year)
-    sstocks = Stock()
+    sstocks = Stock(num=50)
 
     if year == '':
         year = '2017G'
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         stockdic = {}
         print(filename)
         # dname = filename.split('.')[0]
-        wfile = open(datapath + 'Results/' + dname + '-STOCK-MESSAGES-250.csv', 'w')
+        wfile = open(datapath + 'Results/' + dname + '-STOCK-MESSAGES.csv', 'w')
         sorders = StockOrders()
         for g in gendata:
             order = dataset.to_string(g[0])
@@ -93,9 +93,9 @@ if __name__ == '__main__':
             i += 1
         now()
         wfile.close()
-        os.system(' gzip ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv')
+        os.system(' gzip ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES.csv')
         for stock in sstocks.get_list_stocks():
             print(dname, stock)
-            os.system(' zcat ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES-250.csv.gz |grep \'#'
+            os.system(' zcat ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES.csv.gz |grep \'#'
                       + stock + '#' + '\' > ' + datapath + '/Messages/' + dname + '-' + stock + '-MESSAGES.csv')
             os.system('  gzip ' + datapath + '/Messages/' + dname + '-' + stock + '-MESSAGES.csv')
