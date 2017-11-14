@@ -81,23 +81,23 @@ if __name__ == '__main__':
                         price = float(data[7].strip())
                     else:
                         price = float(data[8].strip())
-                    sorders.insert_order(stock, order, ORN, otime=timestamp, bos=data[5].strip(), price=price)
+                    sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), price=price)
                     norders += 1
                 if order == 'U':
                     nORN =  data[4].strip()
-                    sorders.insert_order(stock, order, nORN, timestamp, updid=ORN, price=data[6].strip())
+                    sorders.process_order(stock, order, nORN, timestamp.itime, updid=ORN, price=data[6].strip())
                 # Computes the time between placing and order and canceling it
                 if order == 'D':
                     trans = sorders.query_id(ORN)
-                    ldelete.append(timestamp.itime - trans[1])
-                    sorders.insert_order(stock, order, ORN)
+                    ldelete.append(timestamp.itime - trans.otime)
+                    sorders.process_order(stock, order, ORN)
                 # Computes the time between placing and order and its execution
                 if order in ['E', 'C']:
                     trans = sorders.query_id(ORN)
-                    if trans[2] == 'S':
-                        lexecutionsS.append(timestamp.itime - trans[1])
+                    if trans.buy_sell == 'S':
+                        lexecutionsS.append(timestamp.itime - trans.otime)
                     else:
-                        lexecutionsB.append(timestamp.itime - trans[1])
+                        lexecutionsB.append(timestamp.itime - trans.otime)
                 i += 1
                 if i % 10000 == 0:
                     print('.', end='')

@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 price = float(data[7].strip())
             else:
                 price = float(data[8].strip())
-            sorders.insert_order(stock, order, ORN, otime=timestamp, bos=data[5].strip(), price=price, size=int(data[6].strip()))
+            sorders.process_order(stock, order, ORN, otime=timestamp, bos=data[5].strip(), price=price, size=int(data[6].strip()))
             norders += 1
             if 0.5 < price < 1000:
                 if data[5].strip() == 'B':
@@ -96,12 +96,12 @@ if __name__ == '__main__':
                     lsizeOS.append(int(data[6].strip()))
         if order == 'U':
             nORN =  data[4].strip()
-            sorders.insert_order(stock, order, nORN, timestamp, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
+            sorders.process_order(stock, order, nORN, timestamp, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
         # Computes the time between placing and order and canceling it
         if order == 'D':
             trans = sorders.query_id(ORN)
             ldelete.append(timestamp.itime - trans[1])
-            sorders.insert_order(stock, order, ORN)
+            sorders.process_order(stock, order, ORN)
             price = trans[3]
             if 0.5 < price < 2000:
                 if trans[2] == 'B':

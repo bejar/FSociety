@@ -94,7 +94,7 @@ if __name__ == '__main__':
                         price = float(data[7].strip())
                     else:
                         price = float(data[8].strip())
-                    sorders.insert_order(stock, order, ORN, otime=timestamp, bos=data[5].strip(), price=price, size=int(data[6].strip()))
+                    sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), price=price, size=int(data[6].strip()))
                     norders += 1
                     if 0.5 < price < 1000:
                         if data[5].strip() == 'B':
@@ -108,28 +108,29 @@ if __name__ == '__main__':
 
                 if order == 'U':
                     nORN =  data[4].strip()
-                    sorders.insert_order(stock, order, nORN, timestamp, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
+                    sorders.process_order(stock, order, nORN, timestamp.itime, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
 
                 # Computes the time between placing and order and canceling it
                 if order == 'D':
-                    trans = sorders.query_id(ORN)
-                    ldelete.append(timestamp.itime - trans[1])
-                    sorders.insert_order(stock, order, ORN)
+                    trans = sorders.query_id(ORN).otime
+                    ldelete.append(timestamp.itime - trans)
+                    sorders.process_order(stock, order, ORN)
 
                 # Computes the time between placing and order and its execution
                 if order in ['E', 'C']:
-                    trans = sorders.query_id(ORN)
+                    trans = sorders.query_id(ORN).otime
                     if trans[2] == 'S':
-                        lexecutionsS.append(timestamp.itime - trans[1])
+                        lexecutionsS.append(timestamp.itime - trans)
                         ltimeES.append(timestamp.itime)
                         lpriceES.append(trans[3])
                         lsizeES.append(trans[4])
                     else:
-                        lexecutionsB.append(timestamp.itime - trans[1])
+                        lexecutionsB.append(timestamp.itime - trans)
                         ltimeEB.append(timestamp.itime)
                         lpriceEB.append(trans[3])
                         lsizeEB.append(trans[4])
 
+                # Non-displayable orders
                 if order in ['P']:
                     ltimeEP.append(timestamp.itime)
                     lpriceEP.append(float(data[7].strip()))

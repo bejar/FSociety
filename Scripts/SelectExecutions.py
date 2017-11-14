@@ -54,19 +54,19 @@ if __name__ == '__main__':
                 price = float(data[7].strip())
             else:
                 price = float(data[8].strip())
-            sorders.insert_order(stock, order, ORN, otime=timestamp, bos=data[5].strip(), price=price)
+            sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), price=price)
             norders += 1
         if order == 'U':
             nORN =  data[4].strip()
-            sorders.insert_order(stock, order, nORN, timestamp, updid=ORN, price=data[6].strip())
+            sorders.process_order(stock, order, nORN, timestamp.itime, updid=ORN, price=data[6].strip())
         # Computes the time between placing and order and canceling it
         if order == 'D':
             trans = sorders.query_id(ORN)
-            sorders.insert_order(stock, order, ORN)
+            sorders.process_order(stock, order, ORN)
         # Computes the time between placing and order and its execution
         if order in ['E', 'C']:
             trans = sorders.query_id(ORN)
-            wfile.write(stock + ',' + str(timestamp) + ',' + data[4].strip() + ',' + str(trans[1]) + ',' + trans[2] + ',' + str(trans[3]))
+            wfile.write(stock + ',' + str(timestamp) + ',' + data[4].strip() + ',' + str(trans.otime) + ',' + trans.buy_sell + ',' + str(trans.price))
 
             if order == 'C':
                  wfile.write(',' + str(data[6].strip()) + '\n')

@@ -63,21 +63,21 @@ if __name__ == '__main__':
                 stock = dataset.to_string(g[7]).strip()
                 if stock in sstocks.sstocks:
                     record = ITCHRecord(g)
-                    sorders.insert_order(stock, order, record.ORN, record.timestamp)
+                    sorders.process_order(stock, order, record.ORN, record.timestamp)
                     wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
 
             if order in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)
                 stock = sorders.query_id(record.ORN)
                 if stock is not None:
-                    stock = stock[0]
+                    stock = stock.stock
                     if stock in sstocks.sstocks:
                         wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
                         if order == 'U':
-                            sorders.insert_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp,
-                                                 price=record.price)
+                            sorders.process_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp,
+                                                  price=record.price)
                         if order == 'D':
-                            sorders.insert_order(stock, order, record.ORN)
+                            sorders.process_order(stock, order, record.ORN)
 
             if order in ['P']:
                 record = ITCHRecord(g)

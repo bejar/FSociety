@@ -21,8 +21,9 @@ from .Company import Company
 from .MPI import MPI
 from .StockOrders import StockOrders
 from .Stock import Stock
+from .Order import Order
 
 __author__ = 'bejar'
 
 __all__ = ['Company', 'Stock',
-           'MPI', 'StockOrders']
+           'MPI', 'StockOrders', 'Order']
