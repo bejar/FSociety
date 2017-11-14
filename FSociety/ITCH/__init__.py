@@ -20,8 +20,9 @@ __init__.py
 from .ITCHbin import ITCHv5
 from .ITCHRecord import ITCHRecord
 from .ITCHtime import ITCHtime
+from .ITCHMessages import ITCHMessages
 
 __author__ = 'bejar'
 
 __all__ = [
-    'ITCHv5', 'ITCHRecord', 'ITCHtime']
+    'ITCHv5', 'ITCHRecord', 'ITCHtime', 'ITCHMessages']

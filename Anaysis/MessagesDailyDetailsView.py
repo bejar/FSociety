@@ -20,7 +20,7 @@ MessagesDailyDetailsView
 
 from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
 from FSociety.Util import now, nanoseconds_to_time, capped_prices
-from FSociety.Data import Stock, StockOrders, Company
+from FSociety.Data import Stock, OrdersProcessor, Company
 from FSociety.Config import datapath, ITCH_days
 import pickle
 import os.path

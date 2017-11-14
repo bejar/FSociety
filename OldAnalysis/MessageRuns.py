@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 
 from FSociety.Config import datapath, ITCH_days
-from FSociety.Data import Company, StockOrders
+from FSociety.Data import Company, OrdersProcessor
 from FSociety.ITCH import ITCHtime
 
 __author__ = 'bejar'
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     stock = 'YHOO'
     day = ITCH_days[1]
-    sorders = StockOrders()
+    sorders = OrdersProcessor()
     cpny = Company()
     rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 

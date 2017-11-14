@@ -21,7 +21,7 @@ from FSociety.Data.Order import Order
 
 __author__ = 'bejar'
 # TODO: This structure should be completed to be able to compute the order book
-class StockOrders:
+class OrdersProcessor:
     """
     Class to store the identifiers of the orders in the buy/sell/replace/cancel/delete messages
 
@@ -37,6 +37,61 @@ class StockOrders:
         self.orders = {}  # Dictionary for active orders
         self.canceled = {}  # Dictionary for canceled orders
         self.executed = {}  # Dictionary for executed orders
+
+    def insert_order(self, order):
+        """
+        Processes a new order and modifies the data structure
+        :param order:
+        :return:
+        """
+         # Order Add (B/S)
+        if order in ['A', 'F']:
+            self.orders[id] = order
+
+        # Order Executed (total or partial)
+        if order in ['E']:
+            # Modify the size of the order
+            self.orders[id].size -= order.size
+            # Add to the history of executions of the order its execution
+            self.orders[id].history.append(('E', order.otime, order.size))
+            # If no shares left, move it to executed
+            if self.orders[id].size == 0:
+                self.executed[id] = self.orders.pop(id)
+
+        # Order Executed (total or partial) with price
+        if order in ['C']:
+            if id in self.orders:
+                # Modify the size of the order
+                self.orders[id].size -= order.size
+                # Add to the history of executions of the order its execution
+                self.orders[id].history.append(('C', order.otime, order.size, order.price))
+                # If no shares left, move it to executed
+                if self.orders[id].size == 0:
+                    self.executed[id] = self.orders.pop(id)
+            else:
+                print('Order vanished')
+
+
+        # Order Replace (cancel+replace)
+        if order == 'U':
+            # Add a new order with the new parameters
+            order.buy_sell = self.orders[order.oid].buy_sell
+            self.orders[id] = order
+            # Delete the original order from active orders
+            ro = self.orders.pop(order.oid)
+            # Add the history of the original order
+            self.orders[id].history = ro.history + self.orders[id].history
+
+        # Delete Order
+        if order == 'D' and id in self.orders:
+            self.canceled[id] = self.orders.pop(id)
+            self.canceled[id].history.append(('D', order.otime))
+
+        # Partial cancelation
+        if order == 'X' and id in self.orders:
+            self.orders[id].size -= order.size  # Modify the size of the order
+            self.orders[id].history.append(('X', order.otime, order.size))
+
 
     def process_order(self, stock, order, id, otime=None, bos=None, updid=None, price=None, size=None):
         """

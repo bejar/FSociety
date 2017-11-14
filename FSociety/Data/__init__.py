@@ -19,11 +19,11 @@ __init__.py
 
 from .Company import Company
 from .MPI import MPI
-from .StockOrders import StockOrders
+from .OrdersProcessor import OrdersProcessor
 from .Stock import Stock
 from .Order import Order
 
 __author__ = 'bejar'
 
 __all__ = ['Company', 'Stock',
-           'MPI', 'StockOrders', 'Order']
+           'MPI', 'OrdersProcessor', 'Order']

@@ -24,7 +24,7 @@ from sklearn.manifold import SpectralEmbedding
 
 from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
 from FSociety.Util import now, hellinger_distance
-from FSociety.Data import Stock, StockOrders, Company
+from FSociety.Data import Stock, OrdersProcessor, Company
 from FSociety.Config import datapath, ITCH_days
 
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     lstocks = sorted(sstock.get_list_stocks())
     for stock in lstocks:
         print(stock)
-        sorders = StockOrders()
+        sorders = OrdersProcessor()
         ldelete = []
         lexecutionsS = []
         lexecutionsB = []

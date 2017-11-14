@@ -24,10 +24,11 @@ import gzip
 import numpy as np
 
 
-from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
+from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime, ITCHMessages
 from FSociety.Util import now, nanoseconds_to_time
-from FSociety.Data import Stock, StockOrders, Company
+from FSociety.Data import Stock, OrdersProcessor, Company
 from FSociety.Config import datapath, ITCH_days
+
 
 __author__ = 'bejar'
 
@@ -55,37 +56,41 @@ if __name__ == '__main__':
     if 'G' in year:
         datapath = datapath + '/GIS/'
 
-    rfile = gzip.open(datapath + 'Messages/' + ITCH_days[year][day] + '-' + stock + '-MESSAGES.csv.gz', 'rt')
-    sorders = StockOrders()
+    rfile = ITCHMessages(year, day, stock)
+    sorders = OrdersProcessor()
+    rfile.open()
 
-    for mess in rfile:
-        # print(mess)
-        data = mess.split(',')
-        timestamp = ITCHtime(int(data[1].strip()))
-        order = data[2].strip()
-        ORN = data[3].strip()
-        if order in ['F', 'A']:
-            if order == 'A':
-                price = float(data[7].strip())
-            else:
-                price = float(data[8].strip())
-            sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), size=int(data[6].strip()), price=price)
+    for mess in rfile.get_order():
 
-        if order == 'U':
-            nORN = data[4].strip()
-            sorders.process_order(stock, order, nORN, otime=timestamp.itime, updid=ORN, size=int(data[5].strip()), price=data[6].strip())
+        print(mess.to_string())
+        sorders.insert_order(mess)
 
-        if order == 'D':
-            sorders.process_order(stock, order, ORN)
-
-        if order == 'X':
-            sorders.process_order(stock, order, ORN, size=int(data[4]))
-
-        if order == 'E':
-            sorders.process_order(stock, order, ORN, otime=timestamp.itime, size=int(data[4]))
-
-        if order == 'C':
-            sorders.process_order(stock, order, ORN, otime=timestamp.itime, updid=ORN, size=int(data[4]), price=data[6].strip())
+        # data = mess.split(',')
+        # timestamp = ITCHtime(int(data[1].strip()))
+        # order = data[2].strip()
+        # ORN = data[3].strip()
+        # if order in ['F', 'A']:
+        #     if order == 'A':
+        #         price = float(data[7].strip())
+        #     else:
+        #         price = float(data[8].strip())
+        #     sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), size=int(data[6].strip()), price=price)
+        #
+        # if order == 'U':
+        #     nORN = data[4].strip()
+        #     sorders.process_order(stock, order, nORN, otime=timestamp.itime, updid=ORN, size=int(data[5].strip()), price=float(data[6].strip()))
+        #
+        # if order == 'D':
+        #     sorders.process_order(stock, order, ORN)
+        #
+        # if order == 'X':
+        #     sorders.process_order(stock, order, ORN, size=int(data[4]))
+        #
+        # if order == 'E':
+        #     sorders.process_order(stock, order, ORN, otime=timestamp.itime, size=int(data[4]))
+        #
+        # if order == 'C':
+        #     sorders.process_order(stock, order, ORN, otime=timestamp.itime, size=int(data[4]), price=float(data[6].strip()))
 
 
     sorders.list_executed(mode='exec')

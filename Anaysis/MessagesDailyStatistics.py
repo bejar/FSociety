@@ -28,7 +28,7 @@ import numpy as np
 
 from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
 from FSociety.Util import now
-from FSociety.Data import Stock, StockOrders, Company
+from FSociety.Data import Stock, OrdersProcessor, Company
 from FSociety.Config import datapath, ITCH_days
 
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     for stock in sorted(sstock.get_list_stocks()):
         for day in ITCH_days[year]:
             print(day, stock)
-            sorders = StockOrders()
+            sorders = OrdersProcessor()
 
             rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 

@@ -26,7 +26,7 @@ import numpy as np
 
 from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
 from FSociety.Util import now, nanoseconds_to_time
-from FSociety.Data import Stock, StockOrders, Company
+from FSociety.Data import Stock, OrdersProcessor, Company
 from FSociety.Config import datapath, ITCH_days
 import pickle
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
             lsizeES = []
             lsizeEP = []
 
-            sorders = StockOrders()
+            sorders = OrdersProcessor()
 
             i = 0
             norders = 0

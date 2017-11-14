@@ -17,7 +17,7 @@ Executions
 
 """
 
-from FSociety.Data import Company, StockOrders
+from FSociety.Data import Company, OrdersProcessor
 from FSociety.Config import datapath, ITCH_days
 import argparse
 
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     nday = int(args.day)
 
     day = ITCH_days[year][nday]
-    sorders = StockOrders()
+    sorders = OrdersProcessor()
     cpny = Company()
     rfile = open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv', 'r')
     wfile = open(datapath + '/Results/' + day + '-' + stock + '-EXEC.csv', 'w')

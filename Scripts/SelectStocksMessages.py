@@ -24,7 +24,7 @@ import os
 
 from FSociety.ITCH import ITCHv5, ITCHRecord
 from FSociety.Util import now
-from FSociety.Data import Stock, StockOrders
+from FSociety.Data import Stock, OrdersProcessor
 from FSociety.Config import datapath, ITCH_days
 
 __author__ = 'bejar'
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         print(filename)
         # dname = filename.split('.')[0]
         wfile = open(datapath + 'Results/' + dname + '-STOCK-MESSAGES.csv', 'w')
-        sorders = StockOrders()
+        sorders = OrdersProcessor()
         for g in gendata:
             order = dataset.to_string(g[0])
             if order in ['F', 'A']:
