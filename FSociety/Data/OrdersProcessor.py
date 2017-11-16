@@ -45,53 +45,52 @@ class OrdersProcessor:
         :return:
         """
          # Order Add (B/S)
-        if order in ['A', 'F']:
-            self.orders[id] = order
+        if order.type in ['A', 'F']:
+            self.orders[order.id] = order
 
         # Order Executed (total or partial)
-        if order in ['E']:
+        if order.type in ['E']:
             # Modify the size of the order
-            self.orders[id].size -= order.size
+            self.orders[order.id].size -= order.size
             # Add to the history of executions of the order its execution
-            self.orders[id].history.append(('E', order.otime, order.size))
+            self.orders[order.id].history.append(('E', order.otime, order.size))
             # If no shares left, move it to executed
-            if self.orders[id].size == 0:
-                self.executed[id] = self.orders.pop(id)
+            if self.orders[order.id].size == 0:
+                self.executed[order.id] = self.orders.pop(order.id)
 
         # Order Executed (total or partial) with price
-        if order in ['C']:
-            if id in self.orders:
+        if order.type in ['C']:
+            if order.id in self.orders:
                 # Modify the size of the order
-                self.orders[id].size -= order.size
+                self.orders[order.id].size -= order.size
                 # Add to the history of executions of the order its execution
-                self.orders[id].history.append(('C', order.otime, order.size, order.price))
+                self.orders[order.id].history.append(('C', order.otime, order.size, order.price))
                 # If no shares left, move it to executed
-                if self.orders[id].size == 0:
-                    self.executed[id] = self.orders.pop(id)
+                if self.orders[order.id].size == 0:
+                    self.executed[order.id] = self.orders.pop(order.id)
             else:
                 print('Order vanished')
 
 
         # Order Replace (cancel+replace)
-        if order == 'U':
+        if order.type == 'U':
             # Add a new order with the new parameters
             order.buy_sell = self.orders[order.oid].buy_sell
-            self.orders[id] = order
+            self.orders[order.id] = order
             # Delete the original order from active orders
             ro = self.orders.pop(order.oid)
             # Add the history of the original order
-            self.orders[id].history = ro.history + self.orders[id].history
+            self.orders[order.id].history = ro.history + self.orders[order.id].history
 
         # Delete Order
-        if order == 'D' and id in self.orders:
-            self.canceled[id] = self.orders.pop(id)
-            self.canceled[id].history.append(('D', order.otime))
+        if order.type == 'D' and order.id in self.orders:
+            self.canceled[order.id] = self.orders.pop(order.id)
+            self.canceled[order.id].history.append(('D', order.otime))
 
         # Partial cancelation
-        if order == 'X' and id in self.orders:
-            self.orders[id].size -= order.size  # Modify the size of the order
-            self.orders[id].history.append(('X', order.otime, order.size))
-
+        if order.type == 'X' and order.id in self.orders:
+            self.orders[order.id].size -= order.size  # Modify the size of the order
+            self.orders[order.id].history.append(('X', order.otime, order.size))
 
     def process_order(self, stock, order, id, otime=None, bos=None, updid=None, price=None, size=None):
         """

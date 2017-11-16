@@ -45,11 +45,12 @@ class ITCHRecord():
         """
         self.action = self.ext_string(record[0])
         self.timestamp = ITCHtime(record[3])
-        if self.action in ['A', 'F', 'E', 'C', 'X', 'D', 'U', 'P']:
+        if self.action in ['A', 'F', 'E', 'C', 'X', 'D', 'P']:
             self.ORN = int(record[4])
 
         if self.action in ['U']:
-            self.nORN = int(record[5])
+            self.nORN = int(record[4])
+            self.ORN = int(record[5])
 
         if self.action in ['A', 'F', 'P']:
             self.stock = self.ext_string(record[7]).strip()

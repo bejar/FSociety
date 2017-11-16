@@ -60,10 +60,9 @@ if __name__ == '__main__':
     sorders = OrdersProcessor()
     rfile.open()
 
-    for mess in rfile.get_order():
-
-        print(mess.to_string())
-        sorders.insert_order(mess)
+    for order in rfile.get_order():
+        print(order.to_string())
+        sorders.insert_order(order)
 
         # data = mess.split(',')
         # timestamp = ITCHtime(int(data[1].strip()))
