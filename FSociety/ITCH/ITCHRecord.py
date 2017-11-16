@@ -49,8 +49,8 @@ class ITCHRecord():
             self.ORN = int(record[4])
 
         if self.action in ['U']:
-            self.nORN = int(record[4])
-            self.ORN = int(record[5])
+            self.nORN = int(record[4])  # order to be replaced
+            self.ORN = int(record[5])  # new id of the order
 
         if self.action in ['A', 'F', 'P']:
             self.stock = self.ext_string(record[7]).strip()
@@ -102,30 +102,30 @@ class ITCHRecord():
         rstr = ""
 
         rstr += self.timestamp.stamp()
-        rstr += ', ' + self.action
+        rstr += '&' + self.action
 
         if self.action in ['A', 'F', 'E', 'C', 'D', 'U', 'P', 'X']:
-            rstr += ', ' + str(self.ORN)
+            rstr += '&' + str(self.ORN)
 
         if self.action in ['U']:
-            rstr += ', ' + str(self.nORN)
+            rstr += '&' + str(self.nORN)
 
         if self.action in ['A', 'F', 'P']:
-            rstr += ', ' + self.stock
-            rstr += ', ' + self.order
+            rstr += '&' + self.stock
+            rstr += '&' + self.order
 
         if self.action in ['A', 'F', 'U', 'P']:
-            rstr += ', ' + str(self.shares)
-
-        if self.action in ['F']:
-            rstr += ', ' + self.attribution.strip()
+            rstr += '&' + str(self.shares)
 
         if self.action in ['E', 'C', 'X']:
-            rstr += ', ' + str(self.opshares)
+            rstr += '&' + str(self.opshares)
 
         if self.action in ['E', 'C']:
-            rstr += ', ' + str(self.matchnum)
+            rstr += '&' + str(self.matchnum)
 
         if self.action in ['A', 'F', 'C', 'U', 'P']:
-            rstr += ', ' + str(self.price / 10000)
+            rstr += '&' + str(self.price / 10000)
+
+        if self.action in ['F']:
+            rstr += '&' + self.attribution.strip()
         return rstr

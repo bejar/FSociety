@@ -6,8 +6,8 @@ Stocks
 
 :Description: Stocks
 
-    Selecciona los mensajes F/A/E/X/D/U/C que aparecen en un dia para las
-    companyias en el fichero 'stockselected.csv' (250 companyias con mas operaciones
+    Selecciona los mensajes F/A/E/X/D/U/C que aparecen en un dia para las 'nstock'
+    companyias en el fichero 'stockmonthcsv') (companyias con mas operaciones
     de compra/venta)
 
 :Authors: bejar
@@ -32,10 +32,11 @@ __author__ = 'bejar'
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', help="Anyo del analisis", default='')
+    parser.add_argument('--nstocks', help="Anyo del analisis", default=50)
 
     args = parser.parse_args()
     year = str(args.year)
-    sstocks = Stock(num=50)
+    sstocks = Stock(num=args.nstocks)
 
     if year == '':
         year = '2017G'
@@ -52,42 +53,37 @@ if __name__ == '__main__':
         i = 0
         dataset = ITCHv5(datapath + filename)
         gendata = dataset.records()
-        stockdic = {}
         print(filename)
-        # dname = filename.split('.')[0]
         wfile = open(datapath + 'Results/' + dname + '-STOCK-MESSAGES.csv', 'w')
-        sorders = OrdersProcessor()
+        dorders = {}  # Dictionary to store the F/A/U orders to obtain the stock of U orders
         for g in gendata:
             order = dataset.to_string(g[0])
+
             if order in ['F', 'A']:
                 stock = dataset.to_string(g[7]).strip()
                 if stock in sstocks.sstocks:
                     record = ITCHRecord(g)
-                    sorders.process_order(stock, order, record.ORN, record.timestamp)
-                    wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
+                    dorders[record.ORN] = stock
+                    wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
 
             if order in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)
-                stock = sorders.query_id(record.ORN)
-                if stock is not None:
-                    stock = stock.stock
-                    if stock in sstocks.sstocks:
-                        wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
-                        if order == 'U':
-                            sorders.process_order(stock, order, record.nORN, updid=record.ORN, otime=record.timestamp,
-                                                  price=record.price)
-                        if order == 'D':
-                            sorders.process_order(stock, order, record.ORN)
+                if order == 'U':  # U orders replace active orders
+                    id = record.nORN
+                    dorders[record.ORN] = stock
+                else:
+                    id = record.ORN
+                if id in dorders:
+                    stock = dorders[id]
+                    wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
 
             if order in ['P']:
                 record = ITCHRecord(g)
                 stock = record.stock
                 if stock is not None and stock in sstocks.sstocks:
-                    wfile.write('#%s#, %s\n' % (stock.strip(), record.to_string()))
+                    wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
 
             if i == 1000000:
-                # itime = ITCHtime(g[3])
-                # print(i,  g[3], itime.to_string())
                 i = 0
                 wfile.flush()
             i += 1
