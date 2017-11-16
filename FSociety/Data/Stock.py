@@ -25,7 +25,7 @@ __author__ = 'bejar'
 
 class Stock:
 
-    sstock = None
+    sstocks = None
 
     def __init__(self, fast=False, num=100):
         """
@@ -38,12 +38,12 @@ class Stock:
             file = datapath + '/Data/stockmonth.csv'
 
         rfile = open(file, 'r')
-        self.sstocks = {}
+        self.sstocks = set()
         i = 0
         for stock in rfile:
-            self.sstocks[stock.strip()] = ''
+            self.sstocks.add(stock.strip())
             i += 1
-            if i > num: break
+            if i > num-1: break
         rfile.close()
 
     def get_list_stocks(self):
@@ -51,4 +51,9 @@ class Stock:
 
         :return:
         """
-        return sorted(self.sstocks.keys())
+        return sorted(self.sstocks)
+
+if __name__ == '__main__':
+    s = Stock(num=50)
+    print(s.get_list_stocks())
+    print('AAPL' in s.sstocks)

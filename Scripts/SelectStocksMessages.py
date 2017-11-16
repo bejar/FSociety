@@ -37,6 +37,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     year = str(args.year)
     sstocks = Stock(num=args.nstocks)
+    print(len(sstocks.sstocks))
 
     if year == '':
         year = '2017G'
@@ -56,9 +57,9 @@ if __name__ == '__main__':
         print(filename)
         wfile = open(datapath + 'Results/' + dname + '-STOCK-MESSAGES.csv', 'w')
         dorders = {}  # Dictionary to store the F/A/U orders to obtain the stock of U orders
+        record = None
         for g in gendata:
             order = dataset.to_string(g[0])
-
             if order in ['F', 'A']:
                 stock = dataset.to_string(g[7]).strip()
                 if stock in sstocks.sstocks:
@@ -68,14 +69,15 @@ if __name__ == '__main__':
 
             if order in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)
-                if order == 'U':  # U orders replace active orders
-                    id = record.nORN
-                    dorders[record.ORN] = stock
-                else:
-                    id = record.ORN
-                if id in dorders:
-                    stock = dorders[id]
-                    wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
+                if record.ORN in dorders:
+                    stock = dorders[record.ORN]
+                    if stock in sstocks.sstocks:
+                        if order== 'D':
+                            del dorders[record.ORN]
+                        if order == 'U':  # U orders replace active orders
+                            dorders[record.ORN] = dorders[record.nORN]
+                            del dorders[record.nORN]
+                        wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
 
             if order in ['P']:
                 record = ITCHRecord(g)
@@ -85,6 +87,8 @@ if __name__ == '__main__':
 
             if i == 1000000:
                 i = 0
+                if record is not None:
+                    print(record.timestamp.to_string(), flush=True)
                 wfile.flush()
             i += 1
         now()

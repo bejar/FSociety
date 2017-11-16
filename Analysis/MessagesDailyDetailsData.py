@@ -24,7 +24,7 @@ import gzip
 import numpy as np
 
 
-from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
+from FSociety.ITCH import ITCHtime, ITCHMessages
 from FSociety.Util import now, nanoseconds_to_time
 from FSociety.Data import Stock, OrdersProcessor, Company
 from FSociety.Config import datapath, ITCH_days
@@ -33,28 +33,48 @@ import pickle
 __author__ = 'bejar'
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', help="Anyo del analisis", default='')
+    parser.add_argument('--day', help="dia del anyo", default='')
 
     args = parser.parse_args()
     year = str(args.year)
-    sstocks = Stock()
 
     if year == '':
         year = '2017G'
 
-    if 'G' in year:
-        lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
-        datapath = datapath + '/GIS/'
+    if args.day == '':
+        day = 0
     else:
-        lfiles = [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
+        day = int(args.day)
+
+
+    if 'G' in year:
+        datapath = datapath + '/GIS/'
+
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--year', help="Anyo del analisis", default='')
+    #
+    # args = parser.parse_args()
+    # year = str(args.year)
+    # sstocks = Stock()
+    #
+    # if year == '':
+    #     year = '2017G'
+    #
+    # if 'G' in year:
+    #     lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
+    #     datapath = datapath + '/GIS/'
+    # else:
+    #     lfiles = [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
 
     sstock = Stock(num=50)
     cpny = Company()
 
     for stock in sorted(sstock.get_list_stocks()):
         for day in ITCH_days[year]:
+
+
             print(day, stock)
 
 
@@ -84,57 +104,67 @@ if __name__ == '__main__':
             norders = 0
             rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 
-            for mess in rfile:
-                data = mess.split(',')
-                timestamp = ITCHtime(int(data[1].strip()))
-                order = data[2].strip()
-                ORN = data[3].strip()
-                if order in ['F', 'A']:
-                    if order == 'A':
-                        price = float(data[7].strip())
-                    else:
-                        price = float(data[8].strip())
-                    sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), price=price, size=int(data[6].strip()))
-                    norders += 1
-                    if 0.5 < price < 1000:
-                        if data[5].strip() == 'B':
-                            lpriceOB.append(price)
-                            ltimeOB.append(timestamp.itime)
-                            lsizeOB.append(int(data[6].strip()))
-                        else:
-                            lpriceOS.append(price)
-                            ltimeOS.append(timestamp.itime)
-                            lsizeOS.append(int(data[6].strip()))
+            rfile = ITCHMessages(year, day, stock)
+            sorders = OrdersProcessor()
+            rfile.open()
 
-                if order == 'U':
-                    nORN =  data[4].strip()
-                    sorders.process_order(stock, order, nORN, timestamp.itime, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
+
+
+            # for mess in rfile:
+            for order in rfile.get_order():
+                # data = mess.split(',')
+                # timestamp = ITCHtime(int(data[1].strip()))
+                # order = data[2].strip()
+                # ORN = data[3].strip()
+                print(order.to_string())
+                sorders.insert_order(order)
+
+                if order.type in ['F', 'A', 'U']:
+                    # if order == 'A':
+                    #     price = float(data[7].strip())
+                    # else:
+                    #     price = float(data[8].strip())
+                    # sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), price=price, size=int(data[6].strip()))
+                    norders += 1
+                    if 0.5 < order.price < 1000:
+                        if order.buy_sell == 'B':
+                            lpriceOB.append(order.price)
+                            ltimeOB.append(order.otime)
+                            lsizeOB.append(order.size)
+                        else:
+                            lpriceOS.append(order.price)
+                            ltimeOS.append(order.otime)
+                            lsizeOS.append(order.size)
+
+                # if order == 'U':
+                #     nORN =  data[4].strip()
+                #     sorders.process_order(stock, order, nORN, timestamp.itime, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
 
                 # Computes the time between placing and order and canceling it
                 if order == 'D':
-                    trans = sorders.query_id(ORN).otime
-                    ldelete.append(timestamp.itime - trans)
-                    sorders.process_order(stock, order, ORN)
+                    trans = sorders.query_id(order.id)
+                    ldelete.append(order.otime - trans.otime)
+                    # sorders.process_order(stock, order, ORN)
 
                 # Computes the time between placing and order and its execution
                 if order in ['E', 'C']:
-                    trans = sorders.query_id(ORN).otime
+                    trans = sorders.query_id(order.id)
                     if trans[2] == 'S':
-                        lexecutionsS.append(timestamp.itime - trans)
-                        ltimeES.append(timestamp.itime)
-                        lpriceES.append(trans[3])
-                        lsizeES.append(trans[4])
+                        lexecutionsS.append(order.otime - trans.otime)
+                        ltimeES.append(order.otime)
+                        lpriceES.append(trans.price)
+                        lsizeES.append(trans.size)
                     else:
-                        lexecutionsB.append(timestamp.itime - trans)
-                        ltimeEB.append(timestamp.itime)
-                        lpriceEB.append(trans[3])
-                        lsizeEB.append(trans[4])
+                        lexecutionsB.append(order.otime - trans.otime)
+                        ltimeEB.append(order.otime)
+                        lpriceEB.append(trans.price)
+                        lsizeEB.append(trans.size)
 
                 # Non-displayable orders
                 if order in ['P']:
-                    ltimeEP.append(timestamp.itime)
-                    lpriceEP.append(float(data[7].strip()))
-                    lsizeEP.append(int(data[6].strip()))
+                    ltimeEP.append(order.otime)
+                    lpriceEP.append(order.price)
+                    lsizeEP.append(order.size)
 
             print('Stock:', stock, 'Day:', day)
             print('N Buy orders:', len(ltimeOB))
@@ -173,7 +203,6 @@ if __name__ == '__main__':
             ddata['SizeOrderSell'] = lsizeOS
 
             ddata['DeltaTimeDelete'] = ldelete
-
 
             wfile = open(datapath + '/Results/' + day + '-' + stock + '-MessageAnalysis.pkl', 'wb')
             pickle.dump(ddata, wfile)

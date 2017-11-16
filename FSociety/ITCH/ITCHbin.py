@@ -102,7 +102,7 @@ class ITCHv5:
         try:
             return b.decode('ascii', "replace")
         except AttributeError:
-            print('Attribute Error')
+            print('Attribute Error ++++')
             return str(b)
         except UnicodeDecodeError:
             print('Unicode Error')
