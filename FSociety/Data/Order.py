@@ -86,7 +86,7 @@ class Order:
             self.buy_sell = data[5].strip()
 
         if self.type == 'U':
-            self.oid = data[4].strip() # id of the order to replace
+            self.oid = data[4].strip()  # id of the order to replace
             self.size = int(data[5].strip())
             self.price = float(data[6].strip())
 
@@ -96,27 +96,37 @@ class Order:
         if self.type == 'C':
             self.price = float(data[6].strip())
 
-        if type in ['A', 'F', 'U']:
+        if self.type in ['A', 'F', 'U']:
             self.osize = self.size
-            self.history = [(type, id, self.otime, self.price, self.size)]
+            self.history = [(self.type, self.id, self.otime, self.price, self.size)]
 
     def to_string(self, mode='order'):
         """
         returns a string representing an order
 
         order - The basic info of an order
-        exec - The order after the excution process including its history
-
+        exec - The order after the execution process including its history
+        cancel - The order after the cancelation including its history
         :return:
         """
-        s = nanoseconds_to_time(self.otime) + 'ID: ' + str(self.id) + ' O: ' +self.type + ' S: ' + self.stock
+        s = nanoseconds_to_time(self.otime) + ' ID: ' + str(self.id) + ' O: ' +self.type + ' S: ' + self.stock
         if self.type in ['A', 'F']:
-            s += ' B/S: ' + self.buy_sell + ' SZ: ' + str(self.size) + ' PR: ' + str(self.price)
+            s += ' B/S: ' + self.buy_sell + ' SZ: ' + str(self.osize) + ' PR: ' + str(self.price)
 
         if self.type in ['U']:
             s += ' OID: ' + self.oid
+
         if mode == 'exec':
-            s = nanoseconds_to_time(self.history[-1][1]) + ' <- ' + s
+            s= self.history_to_string() + ' <- ' + s
+            # s = 'H: ' + self.history[-1][0] + ' ' + str(self.history[-1][1]) + ' <- ' + s
+            # s = nanoseconds_to_time(self.history[-1][2]) + ' <- ' + s
+
+        if mode == 'cancel':
+            s= self.history_to_string() + ' <- ' + s
+            # s = 'H: ' + self.history[-1][0] + ' ' + str(self.history[-1][1]) + ' <- ' + s
+            # s = nanoseconds_to_time(self.history[-1][2]) + ' <- ' + s
+
+
         return s
 
     # def to_string2(self):
@@ -129,6 +139,37 @@ class Order:
     #         s += ' SZ: ' + str(self.size)
     #         s += ' PR: ' + str(self.price)
     #     return s
+
+    def history_to_string(self, last=True):
+        """
+
+        Generates a string representing the recorded history of an order
+        :return:
+        """
+        s = ''
+        if last:
+            if self.type in ['A', 'F', 'U']:
+                lasttype = self.history[-1][0] # Type of the last order applied to the order
+                if lasttype == 'C':
+                    s += 'H: ' + lasttype + ' T: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
+                         ' S:' + str(self.history[-1][2]) + ' P:' + str(self.history[-1][3])
+                if lasttype == 'E':
+                    s += 'H: ' + lasttype + ' T: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
+                         ' S:' + str(self.history[-1][2])
+                if lasttype == 'X':
+                    s += 'H: ' + lasttype + ' T: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
+                         ' S:' + str(self.history[-1][2])
+
+                if lasttype == 'D':
+                    s += 'H: ' + lasttype + ' T: ' + nanoseconds_to_time(self.history[-1][1] - self.otime)
+
+                if lasttype == 'U':
+                    s += 'H: ' + lasttype + ' T: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
+                         ' S:' + str(self.history[-1][2]) + ' P:' + str(self.history[-1][3])
+
+
+        return s
+
 
     def __lt__(self, a):
         """

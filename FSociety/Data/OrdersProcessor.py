@@ -36,7 +36,7 @@ class OrdersProcessor:
         """
         self.history = history
         if self.history:
-            self.canceled = {}  # Dictionary for canceled orders
+            self.cancelled = {}  # Dictionary for cancelled orders
             self.executed = {}  # Dictionary for executed orders
 
     def insert_order(self, order, history=False):
@@ -64,8 +64,8 @@ class OrdersProcessor:
                 # If no shares left, move it to executed
                 if self.orders[order.id].size == 0:
                     self.executed[order.id] = self.orders.pop(order.id)
-            else:
-                self.orders.pop(order.id)
+            # else:
+            #     self.orders.pop(order.id)
 
         # Order Executed (total or partial) with price
         if order.type in ['C']:
@@ -89,6 +89,8 @@ class OrdersProcessor:
             self.orders[order.id] = order
             # Delete the original order from active orders
             ro = self.orders.pop(order.oid)
+            ro.history.append(('U', order.otime, ro.osize - self.size, ro.price - self.price))
+            self.cancelled[order.oid] = ro
             if self.history:
                 # Add the history of the original order
                 self.orders[order.id].history = ro.history + self.orders[order.id].history
@@ -96,8 +98,8 @@ class OrdersProcessor:
         # Delete Order
         if order.type == 'D' and order.id in self.orders:
             if self.history:
-                self.canceled[order.id] = self.orders.pop(order.id)
-                self.canceled[order.id].history.append(('D', order.otime))
+                self.cancelled[order.id] = self.orders.pop(order.id)
+                self.cancelled[order.id].history.append(('D', order.otime))
             else:
                 self.orders.pop(order.id)
 
@@ -188,4 +190,17 @@ class OrdersProcessor:
 
         for _, id in sorted(ltimes):
             print(self.executed[id].to_string(mode=mode))
+
+    def list_cancelled(self, mode='order'):
+        """
+        print cancelled orders
+        :return:
+        """
+        ltimes = []
+
+        for id in self.cancelled:
+            ltimes.append((self.cancelled[id].otime, id))
+
+        for _, id in sorted(ltimes):
+            print(self.cancelled[id].to_string(mode=mode))
 

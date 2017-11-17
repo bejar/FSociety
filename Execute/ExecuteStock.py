@@ -57,7 +57,7 @@ if __name__ == '__main__':
         datapath = datapath + '/GIS/'
 
     rfile = ITCHMessages(year, day, stock)
-    sorders = OrdersProcessor()
+    sorders = OrdersProcessor(history=True)
     rfile.open()
 
     for order in rfile.get_order():
@@ -92,6 +92,7 @@ if __name__ == '__main__':
         #     sorders.process_order(stock, order, ORN, otime=timestamp.itime, size=int(data[4]), price=float(data[6].strip()))
 
 
-    sorders.list_executed(mode='exec')
+    # sorders.list_executed(mode='exec')
+    sorders.list_cancelled(mode='exec')
 
 
