@@ -25,12 +25,13 @@ import numpy as np
 def now():
     print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
 
-def nanoseconds_to_time(nnstime):
+def nanoseconds_to_time(nnstime, prec=6):
     """
     Transforms nanoseconds to readable time
     :param nano:
     :return:
     """
+    lfmt = ['{:02d}', ':{:02d}', ':{:02d}', '.{:03d}', '.{:03d}', '.{:03d}']
     nnstime = int(nnstime)
     nnseconds = nnstime % 1000
     nnstime //= 1000
@@ -42,9 +43,12 @@ def nanoseconds_to_time(nnstime):
     rhours = nnstime % 3600
     minutes = rhours // 60
     seconds = rhours % 60
-    return '{:02d}:{:02d}:{:02d}.{:03d}.{:03d}.{:03d}'.format(hours, minutes, seconds,
+    ltimes = [hours, minutes, seconds, mlseconds, mcseconds, nnseconds]
+    s = ''
+    for i in range(prec):
+        s += lfmt[i].format(ltimes[i])
+    return s
 
-                                                                  mlseconds, mcseconds, nnseconds)
 def time_to_nanoseconds(hour, minute=0):
     """
     Computes the nanoseconds for hour:minute

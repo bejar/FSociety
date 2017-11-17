@@ -26,7 +26,7 @@ import numpy as np
 
 from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime, ITCHMessages
 from FSociety.Util import now, nanoseconds_to_time
-from FSociety.Data import Stock, OrdersProcessor, Company
+from FSociety.Data import Stock, OrdersProcessor, Company, OrdersCounter
 from FSociety.Config import datapath, ITCH_days
 
 
@@ -58,41 +58,26 @@ if __name__ == '__main__':
 
     rfile = ITCHMessages(year, day, stock)
     sorders = OrdersProcessor(history=True)
+    ocounter = OrdersCounter(select=['A', 'F', 'E', 'U', 'C', 'D', 'X'], granularity='m')
     rfile.open()
 
+    i = 0
     for order in rfile.get_order():
         print(order.to_string())
         sorders.insert_order(order)
+        ocounter.process_order(order)
+        i += 1
+        if i == 100000:
+            i = 0
+            ocounter.plot_counter(['A',  'D', 'E'])
 
-        # data = mess.split(',')
-        # timestamp = ITCHtime(int(data[1].strip()))
-        # order = data[2].strip()
-        # ORN = data[3].strip()
-        # if order in ['F', 'A']:
-        #     if order == 'A':
-        #         price = float(data[7].strip())
-        #     else:
-        #         price = float(data[8].strip())
-        #     sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), size=int(data[6].strip()), price=price)
-        #
-        # if order == 'U':
-        #     nORN = data[4].strip()
-        #     sorders.process_order(stock, order, nORN, otime=timestamp.itime, updid=ORN, size=int(data[5].strip()), price=float(data[6].strip()))
-        #
-        # if order == 'D':
-        #     sorders.process_order(stock, order, ORN)
-        #
-        # if order == 'X':
-        #     sorders.process_order(stock, order, ORN, size=int(data[4]))
-        #
-        # if order == 'E':
-        #     sorders.process_order(stock, order, ORN, otime=timestamp.itime, size=int(data[4]))
-        #
-        # if order == 'C':
-        #     sorders.process_order(stock, order, ORN, otime=timestamp.itime, size=int(data[4]), price=float(data[6].strip()))
+    ocounter.plot_counter(['A',  'D', 'E'])
+
+
+
 
 
     # sorders.list_executed(mode='exec')
-    sorders.list_cancelled(mode='exec')
+    # sorders.list_cancelled(mode='exec')
 
 
