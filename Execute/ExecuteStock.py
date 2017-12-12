@@ -51,7 +51,7 @@ if __name__ == '__main__':
         day = int(args.day)
 
     if stock == '':
-        stock = 'AAPL'
+        stock = 'GOOGL'
 
     if 'G' in year:
         datapath = datapath + '/GIS/'
