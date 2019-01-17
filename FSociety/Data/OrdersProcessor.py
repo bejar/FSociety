@@ -32,20 +32,18 @@ class OrdersProcessor:
     orders = {} # Dictionary for active orders
     def __init__(self, history=False):
         """
-
+        If history is True record information of the orders modifications and saves the
+        executed and canceled transactions (it needs lots of memory and only is feasible
+        for individual stocks)
         """
         self.history = history
         if self.history:
             self.cancelled = {}  # Dictionary for cancelled orders
             self.executed = {}  # Dictionary for executed orders
 
-    def insert_order(self, order, history=False):
+    def insert_order(self, order):
         """
         Processes a new order and modifies the data structure
-
-        If history is True record information of the orders modifications and saves the
-        executed and canceled transactions (it needs lots of memory and only is feasible
-        for individual stocks)
 
         :param order:
         :return:
@@ -100,8 +98,8 @@ class OrdersProcessor:
             if self.history:
                 self.cancelled[order.id] = self.orders.pop(order.id)
                 self.cancelled[order.id].history.append(('D', order.otime))
-            else:
-                self.orders.pop(order.id)
+            # else:
+            #     self.orders.pop(order.id)
 
         # Partial cancelation
         if order.type == 'X' and order.id in self.orders:

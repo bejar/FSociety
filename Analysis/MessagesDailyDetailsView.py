@@ -6,7 +6,7 @@ MessagesDailyDetailsView
 
 :Description: MessagesDailyDetailsView
 
-    
+    Plots different statistics for the orders of the days of a year
 
 :Authors: bejar
     

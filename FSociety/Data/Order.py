@@ -72,6 +72,7 @@ class Order:
         :return:
         """
         data = mess.split('&')
+        # print(data)
         self.stock = data[0][1:-1]
         self.otime = ITCHtime(int(data[1].strip())).itime
         self.type = data[2].strip()

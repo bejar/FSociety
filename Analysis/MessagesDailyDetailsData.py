@@ -6,7 +6,8 @@ MessagesDailyDetailsData
 
 :Description: MessagesDailyDetailsData
 
-    
+    Computes statistics for buy/sell orders and buy/sell executions for a day
+    and saves the raw data in a pkl file
 
 :Authors: bejar
     
@@ -71,12 +72,8 @@ if __name__ == '__main__':
     sstock = Stock(num=50)
     cpny = Company()
 
-    for stock in sorted(sstock.get_list_stocks()):
-        for day in ITCH_days[year]:
-
-
-            print(day, stock)
-
+    for stock in ['YHOO']: #sorted(sstock.get_list_stocks()):
+        # for day in enumerate(ITCH_days[year]):
 
             lexecutionsS = []
             lexecutionsB = []
@@ -102,7 +99,7 @@ if __name__ == '__main__':
 
             i = 0
             norders = 0
-            rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
+            rfile = gzip.open(datapath + 'Messages/' + ITCH_days[year][day] + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 
             rfile = ITCHMessages(year, day, stock)
             sorders = OrdersProcessor()
@@ -116,7 +113,7 @@ if __name__ == '__main__':
                 # timestamp = ITCHtime(int(data[1].strip()))
                 # order = data[2].strip()
                 # ORN = data[3].strip()
-                print(order.to_string())
+                # print(order.to_string())
                 sorders.insert_order(order)
 
                 if order.type in ['F', 'A', 'U']:
@@ -141,15 +138,18 @@ if __name__ == '__main__':
                 #     sorders.process_order(stock, order, nORN, timestamp.itime, updid=ORN, price=float(data[6].strip()), size=int(data[5].strip()))
 
                 # Computes the time between placing and order and canceling it
-                if order == 'D':
+                if order.type == 'D':
                     trans = sorders.query_id(order.id)
-                    ldelete.append(order.otime - trans.otime)
+                    if trans is not None:
+                        ldelete.append(order.otime - trans.otime)
+                    else:
+                        print('MISSING DELETED' + order.id)
                     # sorders.process_order(stock, order, ORN)
 
                 # Computes the time between placing and order and its execution
-                if order in ['E', 'C']:
+                if order.type in ['E', 'C']:
                     trans = sorders.query_id(order.id)
-                    if trans[2] == 'S':
+                    if trans.buy_sell == 'S':
                         lexecutionsS.append(order.otime - trans.otime)
                         ltimeES.append(order.otime)
                         lpriceES.append(trans.price)
@@ -161,7 +161,7 @@ if __name__ == '__main__':
                         lsizeEB.append(trans.size)
 
                 # Non-displayable orders
-                if order in ['P']:
+                if order.type in ['P']:
                     ltimeEP.append(order.otime)
                     lpriceEP.append(order.price)
                     lsizeEP.append(order.size)
@@ -204,6 +204,6 @@ if __name__ == '__main__':
 
             ddata['DeltaTimeDelete'] = ldelete
 
-            wfile = open(datapath + '/Results/' + day + '-' + stock + '-MessageAnalysis.pkl', 'wb')
+            wfile = open(datapath + '/Results/' + ITCH_days[year][day] + '-' + stock + '-MessageAnalysis.pkl', 'wb')
             pickle.dump(ddata, wfile)
             wfile.close()

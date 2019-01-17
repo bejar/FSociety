@@ -57,6 +57,7 @@ class ITCHMessages:
         :return:
         """
         self.stream = gzip.open(self.path + 'Messages/' + ITCH_days[self.year][self.day] + '-' + self.stock + '-MESSAGES.csv.gz', 'rt')
+        # self.stream = gzip.open(self.path + 'Messages/' + self.day + '-' + self.stock + '-MESSAGES.csv.gz', 'rt')
 
     def get_order(self):
         """
@@ -64,4 +65,5 @@ class ITCHMessages:
         :return:
         """
         for item in self.stream:
+            # print(item)
             yield Order(item)
