@@ -26,7 +26,7 @@ import gzip
 import numpy as np
 
 
-from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime
+from FSociety.ITCH import ITCHtime, ITCHMessages
 from FSociety.Util import now
 from FSociety.Data import Stock, OrdersProcessor, Company
 from FSociety.Config import datapath, ITCH_days
@@ -37,14 +37,14 @@ __author__ = 'bejar'
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Anyo del analisis", default='')
+    parser.add_argument('--year', help="Anyo del analisis", default='2017G')
 
     args = parser.parse_args()
     year = str(args.year)
     sstocks = Stock()
 
-    if year == '':
-        year = '2017G'
+    # if year == '':
+    #     year = '2017G'
 
     if 'G' in year:
         lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
@@ -59,10 +59,12 @@ if __name__ == '__main__':
                 'N Order Executions Buy,Mean time to execution,Max time to execution,Min time to execution,'
                 'N Order deletions,Mean time to deletion,Max time to deletion,Min time to deletion\n')
     for stock in sorted(sstock.get_list_stocks()):
-        for day in ITCH_days[year]:
+        for id, day in enumerate(ITCH_days[year]):
             print(day, stock)
             sorders = OrdersProcessor()
 
+            rfile = ITCHMessages(year, day, stock)
+            rfile.open()
             rfile = gzip.open(datapath + 'Messages/' + day + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 
             lexecutionsS = []
@@ -71,33 +73,19 @@ if __name__ == '__main__':
 
             i = 0
             norders = 0
-            for mess in rfile:
-                data = mess.split(',')
-                timestamp = ITCHtime(int(data[1].strip()))
-                order = data[2].strip()
-                ORN = data[3].strip()
-                if order in ['F', 'A']:
-                    if order == 'A':
-                        price = float(data[7].strip())
-                    else:
-                        price = float(data[8].strip())
-                    sorders.process_order(stock, order, ORN, otime=timestamp.itime, bos=data[5].strip(), price=price)
-                    norders += 1
-                if order == 'U':
-                    nORN =  data[4].strip()
-                    sorders.process_order(stock, order, nORN, timestamp.itime, updid=ORN, price=data[6].strip())
-                # Computes the time between placing and order and canceling it
-                if order == 'D':
-                    trans = sorders.query_id(ORN)
-                    ldelete.append(timestamp.itime - trans.otime)
-                    sorders.process_order(stock, order, ORN)
+            for order in rfile.get_order():
+                sorders.insert_order(order)
+
+                if order.type == 'D':
+                    trans = sorders.query_id(order.id)
+                    ldelete.append(order.otime - trans.otime)
                 # Computes the time between placing and order and its execution
                 if order in ['E', 'C']:
-                    trans = sorders.query_id(ORN)
+                    trans = sorders.query_id(order.id)
                     if trans.buy_sell == 'S':
-                        lexecutionsS.append(timestamp.itime - trans.otime)
+                        lexecutionsS.append(order.otime - trans.otime)
                     else:
-                        lexecutionsB.append(timestamp.itime - trans.otime)
+                        lexecutionsB.append(order.otime - trans.otime)
                 i += 1
                 if i % 10000 == 0:
                     print('.', end='')

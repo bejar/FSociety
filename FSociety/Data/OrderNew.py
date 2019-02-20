@@ -22,7 +22,7 @@ from FSociety.ITCH import ITCHtime
 __author__ = 'bejar'
 
 
-class Order:
+class OrderNew:
     """
     Class for storing order information
     """
@@ -99,7 +99,7 @@ class Order:
 
         if self.type in ['A', 'F', 'U']:
             self.osize = self.size
-            self.history = [(self.type, self.id, self.otime, self.price, self.size)]
+            #self.history = [(self.type, self.id, self.otime, self.price, self.size)]
 
     def to_string(self, mode='order'):
         """
@@ -150,34 +150,29 @@ class Order:
         s = ''
         if last:
             if self.type in ['A', 'F', 'U']:
-                lasttype = self.history[-1][0]  # Type of the last order applied to the order
+                lasttype = self.history[-1].type  # Type of the last order applied to the order
+                delta = self.history[-1].otime - self.otime
                 if lasttype == 'C':
-                    s += 'Last: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
-                         ' SZ:' + str(self.history[-1][2]) + ' P:' + str(self.history[-1][3])
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
                 if lasttype == 'E':
-                    delta = self.history[-1][1] - self.otime
-                    s += f'Last: {lasttype}' + \
-                         f' DeltaT: {nanoseconds_to_time(delta)}' + \
-                         f' SZ: {self.history[-1][2]}'
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} ->  {self.history[-1].to_string()}'
                     if delta < 1_000_000:
                         s = '**' + s
                     if delta < 1_000_000_000:
                         s = '*' + s
-                    h = 'HIST = '
+                    h = 'HIST -----\n'
                     for o in self.history:
-                        h += f'{o[0]}->'
+                        h += f'{o.to_string()}\n'
                     s += f'\n{h}'
 
                 if lasttype == 'X':
-                    s += 'Last: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
-                         ' SZ:' + str(self.history[-1][2])
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
                 if lasttype == 'D':
-                    s += 'Last: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime)
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
                 if lasttype == 'U':
-                    s += 'H: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
-                         ' SZ:' + str(self.history[-1][2]) + ' P:' + str(self.history[-1][3])
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
 
         return s

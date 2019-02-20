@@ -31,7 +31,7 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Anyo del analisis", default='')
+    parser.add_argument('--year', help="Anyo del analisis", default='2017G')
     parser.add_argument('--nstocks', help="Anyo del analisis", default=50)
 
     args = parser.parse_args()
@@ -39,14 +39,11 @@ if __name__ == '__main__':
     sstocks = Stock(num=args.nstocks)
     print(len(sstocks.sstocks))
 
-    if year == '':
-        year = '2017G'
-
     if 'G' in year:
-        lfiles = ['/S' + day + '-v50.txt.gz' for day in ITCH_days[year]]
+        lfiles = [f'/S{day}-v50.txt.gz' for day in ITCH_days[year]]
         datapath = datapath + '/GIS/'
     else:
-        lfiles = [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
+        lfiles = [f'{day}.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
 
     # for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
     for filename, dname in zip(lfiles, ITCH_days[year]):
@@ -55,7 +52,7 @@ if __name__ == '__main__':
         dataset = ITCHv5(datapath + filename)
         gendata = dataset.records()
         print(filename)
-        wfile = open(datapath + 'Results/' + dname + '-STOCK-MESSAGES.csv', 'w')
+        wfile = open(f'{datapath}/Results/{dname}-STOCK-MESSAGES.csv', 'w')
         dorders = {}  # Dictionary to store the F/A/U orders to obtain the stock of U orders
         record = None
         for g in gendata:
@@ -65,7 +62,7 @@ if __name__ == '__main__':
                 if stock in sstocks.sstocks:
                     record = ITCHRecord(g)
                     dorders[record.ORN] = stock
-                    wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
+                    wfile.write(f'#{stock.strip()}#&{record.to_string()}\n')
 
             if order in ['E', 'C', 'X', 'D', 'U']:
                 record = ITCHRecord(g)
@@ -77,13 +74,13 @@ if __name__ == '__main__':
                         if order == 'U':  # U orders replace active orders
                             dorders[record.ORN] = dorders[record.nORN]
                             del dorders[record.nORN]
-                        wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
+                        wfile.write(f'#{stock.strip()}#&{record.to_string()}\n')
 
             if order in ['P']:
                 record = ITCHRecord(g)
                 stock = record.stock
                 if stock is not None and stock in sstocks.sstocks:
-                    wfile.write('#%s#&%s\n' % (stock.strip(), record.to_string()))
+                    wfile.write(f'#{stock.strip()}#&{record.to_string()}\n')
 
             if i == 1000000:
                 i = 0
@@ -93,7 +90,7 @@ if __name__ == '__main__':
             i += 1
         now()
         wfile.close()
-        os.system(' gzip ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES.csv')
+        os.system(f' gzip {datapath}/Results/{dname}-STOCK-MESSAGES.csv')
         for stock in sstocks.get_list_stocks():
             print(dname, stock)
             os.system(' zcat ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES.csv.gz |grep \'#'

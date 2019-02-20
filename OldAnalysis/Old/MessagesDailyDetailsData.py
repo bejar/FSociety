@@ -102,10 +102,9 @@ if __name__ == '__main__':
             rfile = gzip.open(datapath + 'Messages/' + ITCH_days[year][day] + '-' + stock + '-MESSAGES.csv.gz', 'rt')
 
             rfile = ITCHMessages(year, day, stock)
-            sorders = OrdersProcessor()
             rfile.open()
 
-
+            sorders = OrdersProcessor()
 
             # for mess in rfile:
             for order in rfile.get_order():

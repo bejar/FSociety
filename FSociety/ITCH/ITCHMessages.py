@@ -18,7 +18,7 @@ ITCHMessages
 """
 
 from FSociety.Config import datapath, ITCH_days
-from FSociety.Data.Order import Order
+from FSociety.Data.OrderNew import OrderNew
 import gzip
 
 __author__ = 'bejar'
@@ -42,7 +42,6 @@ class ITCHMessages:
         :param day:
         :param stock:
         """
-
         self.path = datapath
         if 'G' in year:
             self.path += '/GIS/'
@@ -66,4 +65,4 @@ class ITCHMessages:
         """
         for item in self.stream:
             # print(item)
-            yield Order(item)
+            yield OrderNew(item)
