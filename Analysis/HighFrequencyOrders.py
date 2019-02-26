@@ -26,7 +26,7 @@ import numpy as np
 
 from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime, ITCHMessages
 from FSociety.Util import now, nanoseconds_to_time
-from FSociety.Data import Stock, OrdersProcessor, OrdersProcessorNew, Company, OrdersCounter
+from FSociety.Data import Stock, OrdersProcessor, Company, OrdersCounter
 from FSociety.Config import datapath, ITCH_days
 
 
@@ -53,17 +53,17 @@ if __name__ == '__main__':
         day = int(args.day)
 
     if stock is None:
-        stock = 'GOOGL'
+        stock = 'MSFT'
 
     # if 'G' in year:
     #     datapath = datapath + '/GIS/'
 
     rfile = ITCHMessages(year, day, stock)
     rfile.open()
-    sorders = OrdersProcessorNew(history=True)
+    sorders = OrdersProcessor(history=True)
 
     for order in rfile.get_order():
         # print(order.to_string())
         sorders.insert_order(order)
 
-    sorders.list_executed(mode='exec')
+    sorders.list_executed(mode='exec', hft=True)

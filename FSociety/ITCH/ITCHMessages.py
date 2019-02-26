@@ -18,7 +18,7 @@ ITCHMessages
 """
 
 from FSociety.Config import datapath, ITCH_days
-from FSociety.Data.OrderNew import OrderNew
+from FSociety.Data.Order import Order
 import gzip
 
 __author__ = 'bejar'
@@ -55,7 +55,7 @@ class ITCHMessages:
         Opens the stream
         :return:
         """
-        self.stream = gzip.open(self.path + 'Messages/' + ITCH_days[self.year][self.day] + '-' + self.stock + '-MESSAGES.csv.gz', 'rt')
+        self.stream = gzip.open(f'{self.path}/Messages/{ITCH_days[self.year][self.day]}-{self.stock}-MESSAGES.csv.gz', 'rt')
         # self.stream = gzip.open(self.path + 'Messages/' + self.day + '-' + self.stock + '-MESSAGES.csv.gz', 'rt')
 
     def get_order(self):
@@ -65,4 +65,4 @@ class ITCHMessages:
         """
         for item in self.stream:
             # print(item)
-            yield OrderNew(item)
+            yield Order(item)

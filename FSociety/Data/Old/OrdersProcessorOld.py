@@ -17,11 +17,9 @@ StockOrders
 
 """
 
-from FSociety.Data.Order import Order
-
 __author__ = 'bejar'
 # TODO: This structure should be completed to be able to compute the order book
-class OrdersProcessorNew:
+class OrdersProcessor:
     """
     Class to store the identifiers of the orders in the buy/sell/replace/cancel/delete messages
 
@@ -59,7 +57,7 @@ class OrdersProcessorNew:
                 # Modify the size of the order
                 self.orders[order.id].size -= order.size
                 # Add to the history of executions of the order its execution
-                self.orders[order.id].history.append(order)
+                self.orders[order.id].history.append(('E', order.otime, order.size))
                 # If no shares left, move it to executed
                 if self.orders[order.id].size == 0:
                     self.executed[order.id] = self.orders.pop(order.id)
@@ -73,7 +71,7 @@ class OrdersProcessorNew:
                     # Modify the size of the order
                     self.orders[order.id].size -= order.size
                     # Add to the history of executions of the order its execution
-                    self.orders[order.id].history.append(order)
+                    self.orders[order.id].history.append(('C', order.otime, order.size, order.price))
                     # If no shares left, move it to executed
                     if self.orders[order.id].size == 0:
                         self.executed[order.id] = self.orders.pop(order.id)
@@ -88,7 +86,7 @@ class OrdersProcessorNew:
             self.orders[order.id] = order
             # Delete the original order from active orders
             ro = self.orders.pop(order.oid)
-            ro.history.append(order)
+            ro.history.append(('U', order.otime, ro.osize - self.size, ro.price - self.price))
             self.cancelled[order.oid] = ro
             if self.history:
                 # Add the history of the original order
@@ -98,7 +96,7 @@ class OrdersProcessorNew:
         if order.type == 'D' and order.id in self.orders:
             if self.history:
                 self.cancelled[order.id] = self.orders.pop(order.id)
-                self.cancelled[order.id].history.append(order)
+                self.cancelled[order.id].history.append(('D', order.otime))
             # else:
             #     self.orders.pop(order.id)
 
@@ -106,7 +104,7 @@ class OrdersProcessorNew:
         if order.type == 'X' and order.id in self.orders:
             if self.history:
                 self.orders[order.id].size -= order.size  # Modify the size of the order
-                self.orders[order.id].history.append(order)
+                self.orders[order.id].history.append(('X', order.otime, order.size))
 
     # def process_order(self, stock, order, id, otime=None, bos=None, updid=None, price=None, size=None):
     #     """

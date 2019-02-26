@@ -17,8 +17,6 @@ StockOrders
 
 """
 
-from FSociety.Data.Order import Order
-
 __author__ = 'bejar'
 # TODO: This structure should be completed to be able to compute the order book
 class OrdersProcessor:
@@ -30,6 +28,8 @@ class OrdersProcessor:
     Each element stores the stock tick and the time of the order
     """
     orders = {} # Dictionary for active orders
+    cancelled = None # Dictionary for cancelled orders
+    executed = None # Dictionary for executed orders
 
     def __init__(self, history=False):
         """
@@ -59,7 +59,7 @@ class OrdersProcessor:
                 # Modify the size of the order
                 self.orders[order.id].size -= order.size
                 # Add to the history of executions of the order its execution
-                self.orders[order.id].history.append(('E', order.otime, order.size))
+                self.orders[order.id].history.append(order)
                 # If no shares left, move it to executed
                 if self.orders[order.id].size == 0:
                     self.executed[order.id] = self.orders.pop(order.id)
@@ -73,10 +73,12 @@ class OrdersProcessor:
                     # Modify the size of the order
                     self.orders[order.id].size -= order.size
                     # Add to the history of executions of the order its execution
-                    self.orders[order.id].history.append(('C', order.otime, order.size, order.price))
+                    self.orders[order.id].history.append(order)
                     # If no shares left, move it to executed
                     if self.orders[order.id].size == 0:
                         self.executed[order.id] = self.orders.pop(order.id)
+                    else:
+                        self.executed[order.id] = self.orders[order.id]
                 else:
                     print('Order vanished')
 
@@ -88,7 +90,7 @@ class OrdersProcessor:
             self.orders[order.id] = order
             # Delete the original order from active orders
             ro = self.orders.pop(order.oid)
-            ro.history.append(('U', order.otime, ro.osize - self.size, ro.price - self.price))
+            ro.history.append(order)
             self.cancelled[order.oid] = ro
             if self.history:
                 # Add the history of the original order
@@ -98,7 +100,7 @@ class OrdersProcessor:
         if order.type == 'D' and order.id in self.orders:
             if self.history:
                 self.cancelled[order.id] = self.orders.pop(order.id)
-                self.cancelled[order.id].history.append(('D', order.otime))
+                self.cancelled[order.id].history.append(order)
             # else:
             #     self.orders.pop(order.id)
 
@@ -106,69 +108,12 @@ class OrdersProcessor:
         if order.type == 'X' and order.id in self.orders:
             if self.history:
                 self.orders[order.id].size -= order.size  # Modify the size of the order
-                self.orders[order.id].history.append(('X', order.otime, order.size))
+                self.orders[order.id].history.append(order)
+                if self.orders[order.id].size == 0:
+                    self.executed[order.id] = self.orders.pop(order.id)
+                else:
+                    self.executed[order.id] = self.orders[order.id]
 
-    # def process_order(self, stock, order, id, otime=None, bos=None, updid=None, price=None, size=None):
-    #     """
-    #     Inserts an order in the structure
-    #
-    #     :param stock: Nombre de la accion
-    #     :param otime: Tiempo orden en ITCHtime
-    #     :param bos:  Compra o venta (B/S)
-    #     :param updid: Actualizacion del ID de la orden (para modificaciones)
-    #     :param price: precio de la orden
-    #     :param size: Tamanyo de la orden
-    #     :param order: Tipo de orden
-    #     :param id: Identificador de la orden
-    #     :return:
-    #     """
-    #
-    #     # Order Add (B/S)
-    #     if order in ['A', 'F']:
-    #         self.orders[id] = Order(order, id, otime, stock=stock, b_s=bos, price=price, size=size)
-    #
-    #     # Order Executed (total or partial)
-    #     if order in ['E']:
-    #         if self.history:
-    #             # Modify the size of the order
-    #             self.orders[id].size -= size
-    #             # Add to the history of executions of the order its execution
-    #             self.orders[id].history.append(('E', otime, size))
-    #             # If no shares left, move it to executed
-    #             if self.orders[id].size == 0:
-    #                 self.executed[id] = self.orders.pop(id)
-    #
-    #     # Order Executed (total or partial) with price
-    #     if order in ['C']:
-    #         if id in self.orders:
-    #             # Modify the size of the order
-    #             self.orders[id].size -= size
-    #             # Add to the history of executions of the order its execution
-    #             self.orders[id].history.append(('C', otime, size, price))
-    #             # If no shares left, move it to executed
-    #             if self.orders[id].size == 0:
-    #                 self.executed[id] = self.orders.pop(id)
-    #         else:
-    #             print('Order vanished')
-    #
-    #     # Order Replace (cancel+replace)
-    #     if order == 'U':
-    #         # Add a new order with the new parameters
-    #         self.orders[id] = Order(order, id, otime, stock=stock, b_s=self.orders[updid].buy_sell, price=price, size=size)
-    #         # Delete the original order from active orders
-    #         ro = self.orders.pop(updid)
-    #         # Add the history of the original order
-    #         self.orders[id].history = ro.history + self.orders[id].history
-    #
-    #     # Delete Order
-    #     if order == 'D' and id in self.orders:
-    #         self.canceled[id] = self.orders.pop(id)
-    #         self.canceled[id].history.append(('D', otime))
-    #
-    #     # Partial cancelation
-    #     if order == 'X' and id in self.orders:
-    #         self.orders[id].size -= size  # Modify the size of the order
-    #         self.orders[id].history.append(('X', otime, size))
 
     def query_id(self, id):
         if id in self.orders:
@@ -176,7 +121,7 @@ class OrdersProcessor:
         else:
             return None
 
-    def list_executed(self, mode='order'):
+    def list_executed(self, mode='order', hft=False):
         """
         print executed orders
         :return:
@@ -186,8 +131,30 @@ class OrdersProcessor:
         for id in self.executed:
             ltimes.append((self.executed[id].otime, id))
 
+        t = 0
+        fdict = {1_000:0,10_000:0,100_000:0,1_000_000:0,10_000_000:0,100_000_000:0,1_000_000_000:0}
         for _, id in sorted(ltimes):
-            print(self.executed[id].to_string(mode=mode))
+            if hft:
+                delta = self.executed[id].history_time_length()
+                if delta is not None and 0< delta < 1_000_000_000:
+                    print(self.executed[id].to_string(mode=mode))
+                    for v in fdict:
+                        if delta//v == 0:
+                            fdict[v]+=1
+                            break
+                    t += 1
+            else:
+                print(self.executed[id].to_string(mode=mode))
+                t+=1
+
+        if hft:
+            print(f"{t} HFT transactions ")
+            for v in fdict:
+                print(f"{v}< {fdict[v]}")
+        else:
+            print(f"{t} transactions ")
+
+
 
     def list_cancelled(self, mode='order'):
         """
@@ -201,4 +168,59 @@ class OrdersProcessor:
 
         for _, id in sorted(ltimes):
             print(self.cancelled[id].to_string(mode=mode))
+
+
+    def list_pending_orders(self, mode='order'):
+        """
+        List orders that are not executed or cancelled
+        :return:
+        """
+
+        ltimes = []
+
+        for id in self.orders:
+            ltimes.append((self.orders[id].otime, id))
+
+        for _, id in sorted(ltimes):
+            print(self.orders[id].to_string(mode=mode))
+            if self.orders[id].history:
+                if len(self.orders[id].history)>1:
+                    print(self.orders[id].history_to_string())
+
+    def sorted_orders(self, otype='open'):
+        """
+        Returns a time ordered list with the "open" orders, "executed" orders and "cancelled" orders
+        :param type:
+        :return:
+        """
+        if otype == 'open':
+            ltimes =[(self.orders[o].otime, self.orders[o]) for o in self.orders]
+        elif otype == 'executed':
+             ltimes =[(self.executed[o].otime, self.executed[o]) for o in self.executed]
+        elif otype == 'cancelled':
+             ltimes =[(self.cancelled[o].otime, self.cancelled[o]) for o in self.cancelled]
+        else:
+            ltimes = []
+
+        return([o for _, o in sorted(ltimes)])
+
+
+if __name__ == '__main__':
+    from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime, ITCHMessages
+
+    year = '2017G'
+    day = 0
+    stock = 'MSFT'
+    rfile = ITCHMessages(year, day, stock)
+    rfile.open()
+    sorders = OrdersProcessor(history=True)
+    for order in rfile.get_order():
+        # print(order.to_string())
+        sorders.insert_order(order)
+
+
+    sorders.list_pending_orders()
+
+
+
 

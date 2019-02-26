@@ -95,9 +95,6 @@ class OrdersCounter:
             self.countertick['Z'].append(nanoseconds_to_time(self.counter['Z'][0]*self.granularity, prec=self.precision))
             self.counter['Z'] = [int(order.otime/self.granularity), 1]
 
-
-
-
     def plot_counter(self, otype):
         """
         Plots the

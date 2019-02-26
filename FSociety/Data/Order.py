@@ -1,10 +1,10 @@
 """
-.. module:: Order.py
+.. module:: OrderOld.py
 
-Order.py
+OrderOld.py
 *************
 
-:Description: Order.py
+:Description: OrderOld.py
 
     
 
@@ -35,34 +35,8 @@ class Order:
     price = 0
     size = 0
     history = []
+    summary = None
     # status = None
-
-    # def __init__(self, type, id, otime, stock=None, b_s=None,price=0, size=0):
-    #     """
-    #     Creates an order object
-    #
-    #     :param type:
-    #     :param id:
-    #     :param stock:
-    #     :param b_s:
-    #     :param otime:
-    #     :param price:
-    #     :param size:
-    #     """
-    #     self.type = type
-    #     self.id = id
-    #     self.otime = otime
-    #     # self.status = 'A'  # Active (I - executed, C - canceled, D - deleted)
-    #
-    #     if type in ['A', 'F', 'E', 'U']:
-    #         self.stock = stock
-    #
-    #     if type in ['A', 'F', 'U']:
-    #         self.price = price
-    #         self.size = size
-    #         self.osize = size
-    #         self.buy_sell = b_s
-    #         self.history = [(type, id, otime, price, size)]
 
     def __init__(self, mess):
         """
@@ -99,7 +73,7 @@ class Order:
 
         if self.type in ['A', 'F', 'U']:
             self.osize = self.size
-            self.history = [(self.type, self.id, self.otime, self.price, self.size)]
+            self.history=[self]
 
     def to_string(self, mode='order'):
         """
@@ -117,29 +91,28 @@ class Order:
         if self.type in ['U']:
             s += f' OID: {self.oid}'
 
+        if self.type in ['E']:
+            s += f' SX: {self.size}'
+
+        if self.type in ['C']:
+            s += f' SX: {self.size} PR: {self.price}'
+
+        if self.type in ['X']:
+            s += f' SX: {self.size}'
+
         if mode == 'exec':
-            s= f'{s}\n{self.history_to_string()}'
+            s= f'{s}{self.history_to_string()}'
             # s = 'H: ' + self.history[-1][0] + ' ' + str(self.history[-1][1]) + ' <- ' + s
             # s = nanoseconds_to_time(self.history[-1][2]) + ' <- ' + s
 
         if mode == 'cancel':
-            s= f'{s}\n{self.history_to_string()}'
+            s= f'{s}{self.history_to_string()}'
             # s = 'H: ' + self.history[-1][0] + ' ' + str(self.history[-1][1]) + ' <- ' + s
             # s = nanoseconds_to_time(self.history[-1][2]) + ' <- ' + s
 
 
         return s
 
-    # def to_string2(self):
-    #     s = nanoseconds_to_time(self.otime)
-    #     s += 'ID: ' + str(self.id)
-    #     s+= ' O: ' + self.type
-    #     s+= ' S: ' + self.stock
-    #     if self.type in ['A', 'F']:
-    #         s += ' B/S: ' + self.buy_sell
-    #         s += ' SZ: ' + str(self.size)
-    #         s += ' PR: ' + str(self.price)
-    #     return s
 
     def history_to_string(self, last=True):
         """
@@ -150,38 +123,52 @@ class Order:
         s = ''
         if last:
             if self.type in ['A', 'F', 'U']:
-                lasttype = self.history[-1][0]  # Type of the last order applied to the order
+                lasttype = self.history[-1].type  # Type of the last order applied to the order
+                delta = self.history[-1].otime - self.otime
+                if delta < 1_000_000:
+                    dt = 'VHF'
+                elif delta < 1_000_000_000:
+                    dt = 'HF'
+                else:
+                    dt = 'N'
+
                 if lasttype == 'C':
-                    s += 'Last: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
-                         ' SZ:' + str(self.history[-1][2]) + ' P:' + str(self.history[-1][3])
-                if lasttype == 'E':
-                    delta = self.history[-1][1] - self.otime
-                    s += f'Last: {lasttype}' + \
-                         f' DeltaT: {nanoseconds_to_time(delta)}' + \
-                         f' SZ: {self.history[-1][2]}'
-                    if delta < 1_000_000:
-                        s = '**' + s
-                    if delta < 1_000_000_000:
-                        s = '*' + s
-                    h = 'HIST = '
+                    #s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
+                    h = f'HIST ----- {dt} D: {nanoseconds_to_time(delta)}\n'
                     for o in self.history:
-                        h += f'{o[0]}->'
+                        h += f'D= {nanoseconds_to_time(o.otime - self.history[0].otime)}| {o.to_string()}\n'
+                    s += f'\n{h}'
+                if lasttype == 'E':
+                    h = f'HIST ----- {dt} D: {nanoseconds_to_time(delta)}\n'
+                    for o in self.history:
+                        h += f'D= {nanoseconds_to_time(o.otime - self.history[0].otime)}| {o.to_string()}\n'
                     s += f'\n{h}'
 
                 if lasttype == 'X':
-                    s += 'Last: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
-                         ' SZ:' + str(self.history[-1][2])
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
                 if lasttype == 'D':
-                    s += 'Last: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime)
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
                 if lasttype == 'U':
-                    s += 'H: ' + lasttype + ' DeltaT: ' + nanoseconds_to_time(self.history[-1][1] - self.otime) +\
-                         ' SZ:' + str(self.history[-1][2]) + ' P:' + str(self.history[-1][3])
+                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
 
         return s
 
+    def history_time_length(self):
+        """
+        Returns when there is a history in the order the difference of time between the creation of the order
+        and the last transaction in the history (if there is only the transaction then the delta is 0)
+
+        If no history
+        :return:
+        """
+
+        if self.type in ['A', 'F', 'U']:
+            return self.history[-1].otime - self.history[0].otime
+        else:
+            return None
 
     def __lt__(self, a):
         """

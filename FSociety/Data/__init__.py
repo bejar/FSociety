@@ -20,13 +20,11 @@ __init__.py
 from .Company import Company
 from .MPI import MPI
 from .OrdersProcessor import OrdersProcessor
-from .OrdersProcessorNew import OrdersProcessorNew
 from .Stock import Stock
-from .Order import Order
-from .OrderNew import OrderNew
+from FSociety.Data.Old.OrderOld import Order
 from .OrdersCounter import OrdersCounter
 
 __author__ = 'bejar'
 
 __all__ = ['Company', 'Stock',
-           'MPI', 'OrdersProcessor', 'OrdersProcessorNew', 'Order', 'OrderNew', 'OrdersCounter']
+           'MPI', 'OrdersProcessor', 'Order', 'OrdersCounter']

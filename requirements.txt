@@ -1,0 +1,5 @@
+numpy
+scipy
+pqdict
+seaborn
+matplotlib
