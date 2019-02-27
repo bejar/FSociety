@@ -29,7 +29,7 @@ class ITCHRecord():
     action = None
     timestamp = None
     ORN = None
-    nORN = None # for replace orders
+    oORN = None # for replace orders
     stock = None
     order = None
     shares = None
@@ -49,7 +49,7 @@ class ITCHRecord():
             self.ORN = int(record[4])
 
         if self.action in ['U']:
-            self.nORN = int(record[4])  # order to be replaced
+            self.oORN = int(record[4])  # order to be replaced
             self.ORN = int(record[5])  # new id of the order
 
         if self.action in ['A', 'F', 'P']:
@@ -108,7 +108,7 @@ class ITCHRecord():
             rstr += '&' + str(self.ORN)
 
         if self.action in ['U']:
-            rstr += '&' + str(self.nORN)
+            rstr += '&' + str(self.oORN)
 
         if self.action in ['A', 'F', 'P']:
             rstr += '&' + self.stock

@@ -46,14 +46,12 @@ class Order:
         :return:
         """
         data = mess.split('&')
-        # print(data)
         self.stock = data[0][1:-1]
         self.otime = ITCHtime(int(data[1].strip())).itime
         self.type = data[2].strip()
         self.id = data[3].strip()
 
         if self.type in ['F', 'A']:
-
             self.price = float(data[7].strip())
             if self.type == 'F':
                 self.attr = data[8].strip() # MPI attibution
@@ -74,6 +72,9 @@ class Order:
         if self.type in ['A', 'F', 'U']:
             self.osize = self.size
             self.history=[self]
+            
+        if self.type in ['P']:
+            self.osize = int(data[6].strip())
 
     def to_string(self, mode='order'):
         """
