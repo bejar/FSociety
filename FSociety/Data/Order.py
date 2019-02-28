@@ -157,17 +157,22 @@ class Order:
 
         return s
 
-    def history_time_length(self):
+    def history_time_length(self, dist=None):
         """
         Returns when there is a history in the order the difference of time between the creation of the order
-        and the last transaction in the history (if there is only the transaction then the delta is 0)
+        and the last transaction or a specific transaction in the history (if there is only the transaction
+        then the delta is 0)
 
-        If no history
+        If no history returns None
+
         :return:
         """
 
         if self.type in ['A', 'F', 'U']:
-            return self.history[-1].otime - self.history[0].otime
+            if dist is None:
+                return self.history[-1].otime - self.history[0].otime
+            else:
+                return self.history[dist].otime - self.history[0].otime
         else:
             return None
 
