@@ -20,28 +20,68 @@ TimeLineSummary
 
 """
 
+import argparse
 from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime, ITCHMessages
 from FSociety.Util import now, nanoseconds_to_time
 from FSociety.Data import Stock, OrdersProcessor, Company, OrdersCounter
 from FSociety.Config import datapath, ITCH_days
 from collections import Counter
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+def sum_count(count, lim=0):
+    """
+    Sums the total of the counter
+    :param count:
+    :return:
+    """
+    if lim == 0:
+        return (np.sum([v for _, v in count]))
+    else:
+        return (np.sum([v for _, v in count[:lim]]))
+
 
 __author__ = 'bejar'
 
-if __name__ == '__main__':
+timelines = [10_000_000_000, 1_000_000_000, 100_000_000, 10_000_000, 1_000_000, 100_000, 10_000, 0]
+ntimelines = ['>10sec', '>1 sec', '>100 msec', '> 10 msec', '> 1 msec', '> 100 mc sec', '> 10 mc sec', '>10 mc sec']
+stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'nextprice']
 
-    year = '2017G'
-    day = 0
-    stock = 'GOOGL'
+
+def in_timeline(v):
+    """
+    Computes the timeline of the executed transaction
+
+    :param v:
+    :return:
+    """
+    for i, t in enumerate(timelines):
+        if v > t:
+            return i
+
+
+def do_the_job(year, day, stock, logging=False):
+    """
+
+    :param year:
+    :param day:
+    :param stock:
+    :return:
+    """
+
+    ## Structure for collecting statistics
+    statistics = {v: {} for v in timelines}
+    for v in statistics:
+        statistics[v]['buy'] = {s: [] for s in stat}
+        statistics[v]['sell'] = {s: [] for s in stat}
+
     rfile = ITCHMessages(year, day, stock)
     rfile.open()
     sorders = OrdersProcessor(history=True)
     for order in rfile.get_order():
-        # print(order.to_string())
         sorders.insert_order(order)
-
-
-    #sorders.list_pending_orders()
 
     lopen = sorders.sorted_orders(otype='open')
     lexecuted = sorders.sorted_orders(otype='executed')
@@ -56,8 +96,8 @@ if __name__ == '__main__':
 
     # Add to the list an executed order with the time of the last execution
     for o in lexecuted:
-       lorders.append((o.otime, 'XI', o.id))
-       lorders.append((o.history[-1].otime, 'XF', o.id))
+        lorders.append((o.otime, 'XI', o.id))
+        lorders.append((o.history[-1].otime, 'XF', o.id))
 
     # Add to the list a cancelled order with the time of the initial order and the time of the final cancellation
     for o in lcancelled:
@@ -66,67 +106,225 @@ if __name__ == '__main__':
 
     lorders = sorted(lorders)
 
-    print(len(lorders))
-
     # Processes all the itervals for the orders and registers for all the executions a
-    # copy of the state of the orders
-    #sopen = []
-    #scancel = []
-    #sexec = []
+    # some statistics
     cbuy = Counter()
     csell = Counter()
-    for t,op,id in lorders:
+    for t, op, id in lorders:
         if op == 'O':
             if sorders.orders[id].buy_sell == 'B':
                 cbuy.update([sorders.orders[id].price])
             else:
                 csell.update([sorders.orders[id].price])
-            #sopen.append(id)
+            # sopen.append(id)
         elif op == 'CI':
             if sorders.cancelled[id].buy_sell == 'B':
                 cbuy.update([sorders.cancelled[id].price])
             else:
                 csell.update([sorders.cancelled[id].price])
-            #scancel.append(id)
+            # scancel.append(id)
         elif op == 'CF':
             if sorders.cancelled[id].buy_sell == 'B':
                 cbuy.subtract([sorders.cancelled[id].price])
             else:
                 csell.subtract([sorders.cancelled[id].price])
-            #scancel.remove(id)
+            # scancel.remove(id)
         elif op == 'XI':
             if sorders.executed[id].buy_sell == 'B':
                 cbuy.update([sorders.executed[id].price])
             else:
                 csell.update([sorders.executed[id].price])
-            #sexec.append(id)
+            # sexec.append(id)
         else:  # it is an execution
-            #sorders.executed[id].summary=[sopen[:], scancel[:], sexec[:]]
-            #print(f'ID: {id} O: {len(sopen)} C: {len(scancel)} X: {len(sexec)}')
-            #input("ready? ")
-            if 10000<sorders.executed[id].history_time_length()<100000:
-                print('********************************************')
-                print(f'ID: {id}')
-                print(sorders.executed[id].to_string(mode='exec'))
+
+            if sorders.executed[id].buy_sell == 'B':
+                cbuy.subtract([sorders.executed[id].price])
+            else:
+                csell.subtract([sorders.executed[id].price])
+
+            pendingbuy = sorted([v for v in cbuy.items() if v[1] > 0], reverse=True)
+            pendingsell = sorted([v for v in csell.items() if v[1] > 0])
+            bestbuy = pendingbuy[0][0]
+            bestsell = pendingsell[0][0]
+            timeline = in_timeline(sorders.executed[id].history_time_length())
+            if timeline >= 0:
+                if logging:
+                    print('********************************************')
+                    print(f'ID: {id}')
+                    print(sorders.executed[id].to_string(mode='exec'))
                 if sorders.executed[id].buy_sell == 'B':
-                    print(f'BUY: {sorders.executed[id].price}')
-                    print(sorted([v for v in cbuy.items() if v[1]>0],reverse=True)[:10])
+                    if logging:
+                        print(f'BUY: {sorders.executed[id].price} / {bestsell - sorders.executed[id].price}')
+                    key = 'buy'
+                    gap = bestsell - sorders.executed[id].price
+                    diff = sorders.executed[id].price - bestbuy
                 else:
-                    print(f'SELL: {sorders.executed[id].price}')
-                    print(sorted([v for v in csell.items() if v[1]>0])[:10])
-                if sorders.executed[id].buy_sell == 'B':
-                    cbuy.subtract([sorders.executed[id].price])
-                else:
-                    csell.subtract([sorders.executed[id].price])
-                
+                    if logging:
+                        print(f'SELL: {sorders.executed[id].price} / {sorders.executed[id].price - bestbuy}')
+                    key = 'sell'
+                    gap = sorders.executed[id].price - bestbuy
+                    diff = bestsell - sorders.executed[id].price
+
+                if logging:
+                    print(pendingsell[:5])
+                    print(pendingbuy[:5])
+                    print(f'PBUY={bestbuy} PSELL={bestsell}')
+                    print(f'CBUY={sum_count(pendingbuy) - 1} SELL={sum_count(pendingbuy) - 1}')
+
+                statistics[timelines[timeline]][key]['price'].append(sorders.executed[id].price)
+                statistics[timelines[timeline]][key]['lenbuy'].append(sum_count(pendingbuy))
+                statistics[timelines[timeline]][key]['lensell'].append(sum_count(pendingsell))
+                statistics[timelines[timeline]][key]['lenbuy5'].append(sum_count(pendingbuy, lim=5))
+                statistics[timelines[timeline]][key]['lensell5'].append(sum_count(pendingsell, lim=5))
+                statistics[timelines[timeline]][key]['lenbuy10'].append(sum_count(pendingbuy, lim=10))
+                statistics[timelines[timeline]][key]['lensell10'].append(sum_count(pendingsell, lim=10))
+                statistics[timelines[timeline]][key]['nextprice'].append(diff)
+                statistics[timelines[timeline]][key]['gap'].append(gap)
+
+    return statistics
 
 
-#    for o in sorders.executed:
-#        print(f'OP: {len(sorders.executed[o].summary[0])} CA: {len(sorders.executed[o].summary[1])}')
+if __name__ == '__main__':
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Anyo del analisis", default='2017G')
+    parser.add_argument('--day', help="dia del anyo", type=int, default=0)
+    parser.add_argument('--stock', help="Stock del analisis", default='GOOGL')
+    parser.add_argument('--log', help="Prints order executions", action='store_true', default=False)
+    args = parser.parse_args()
 
+    statistics = do_the_job(args.year, args.day, args.stock, logging=args.log)
 
+    #     rfile = ITCHMessages(year, day, stock)
+    #     rfile.open()
+    #     sorders = OrdersProcessor(history=True)
+    #     for order in rfile.get_order():
+    #         # print(order.to_string())
+    #         sorders.insert_order(order)
+    #
+    #
+    #     #sorders.list_pending_orders()
+    #
+    #     lopen = sorders.sorted_orders(otype='open')
+    #     lexecuted = sorders.sorted_orders(otype='executed')
+    #     lcancelled = sorders.sorted_orders(otype='cancelled')
+    #
+    #     # list for storing all the orders in chonological order
+    #     lorders = []
+    #
+    #     # Add to the list an open order with its time
+    #     for o in lopen:
+    #         lorders.append((o.otime, 'O', o.id))
+    #
+    #     # Add to the list an executed order with the time of the last execution
+    #     for o in lexecuted:
+    #        lorders.append((o.otime, 'XI', o.id))
+    #        lorders.append((o.history[-1].otime, 'XF', o.id))
+    #
+    #     # Add to the list a cancelled order with the time of the initial order and the time of the final cancellation
+    #     for o in lcancelled:
+    #         lorders.append((o.otime, 'CI', o.id))
+    #         lorders.append((o.history[-1].otime, 'CF', o.id))
+    #         #if o.history[-1].type == 'U':
+    #         #    print('-------------------------------------------')
+    #         #    print(o.to_string(mode='exec'))
+    #         #    print('-------------------------------------------')
+    #
+    #     lorders = sorted(lorders)
+    #
+    #     print(len(lorders))
+    #
+    #     # Processes all the itervals for the orders and registers for all the executions a
+    #     # some statistics
+    #     cbuy = Counter()
+    #     csell = Counter()
+    #     for t,op,id in lorders:
+    #         if op == 'O':
+    #             if sorders.orders[id].buy_sell == 'B':
+    #                 cbuy.update([sorders.orders[id].price])
+    #             else:
+    #                 csell.update([sorders.orders[id].price])
+    #             #sopen.append(id)
+    #         elif op == 'CI':
+    #             if sorders.cancelled[id].buy_sell == 'B':
+    #                 cbuy.update([sorders.cancelled[id].price])
+    #             else:
+    #                 csell.update([sorders.cancelled[id].price])
+    #             #scancel.append(id)
+    #         elif op == 'CF':
+    #             if sorders.cancelled[id].buy_sell == 'B':
+    #                 cbuy.subtract([sorders.cancelled[id].price])
+    #             else:
+    #                 csell.subtract([sorders.cancelled[id].price])
+    #             #scancel.remove(id)
+    #         elif op == 'XI':
+    #             if sorders.executed[id].buy_sell == 'B':
+    #                 cbuy.update([sorders.executed[id].price])
+    #             else:
+    #                 csell.update([sorders.executed[id].price])
+    #             #sexec.append(id)
+    #         else:  # it is an execution
+    #
+    #             if sorders.executed[id].buy_sell == 'B':
+    #                 cbuy.subtract([sorders.executed[id].price])
+    #             else:
+    #                 csell.subtract([sorders.executed[id].price])
+    #
+    #             pendingbuy = sorted([v for v in cbuy.items() if v[1] > 0], reverse=True)
+    #             pendingsell = sorted([v for v in csell.items() if v[1] > 0])
+    #             bestbuy = pendingbuy[0][0]
+    #             bestsell = pendingsell[0][0]
+    #             timeline = in_timeline(sorders.executed[id].history_time_length())
+    #             if timeline>=0:
+    #                 print('********************************************')
+    #                 print(f'ID: {id}')
+    #                 print(sorders.executed[id].to_string(mode='exec'))
+    #                 if sorders.executed[id].buy_sell == 'B':
+    #                     print(f'BUY: {sorders.executed[id].price} / {bestsell-sorders.executed[id].price}' )
+    #                     key='buy'
+    #                     gap = bestsell-sorders.executed[id].price
+    #                     diff = sorders.executed[id].price - bestbuy
+    #                 else:
+    #                     print(f'SELL: {sorders.executed[id].price} / {sorders.executed[id].price-bestbuy}')
+    #                     key='sell'
+    #                     gap = sorders.executed[id].price-bestbuy
+    #                     diff = bestsell - sorders.executed[id].price
+    #
+    #                 print(pendingsell[:5])
+    #                 print(pendingbuy[:5])
+    #                 print(f'PBUY={bestbuy} PSELL={bestsell}')
+    #                 print(f'CBUY={sum_count(pendingbuy)-1} SELL={sum_count(pendingbuy)-1}')
+    #
+    #                 statistics[timelines[timeline]][key]['price'].append(sorders.executed[id].price)
+    #                 statistics[timelines[timeline]][key]['lenbuy'].append(sum_count(pendingbuy))
+    #                 statistics[timelines[timeline]][key]['lensell'].append(sum_count(pendingsell))
+    #                 statistics[timelines[timeline]][key]['lenbuy5'].append(sum_count(pendingbuy,lim=5))
+    #                 statistics[timelines[timeline]][key]['lensell5'].append(sum_count(pendingsell,lim=5))
+    #                 statistics[timelines[timeline]][key]['lenbuy10'].append(sum_count(pendingbuy,lim=10))
+    #                 statistics[timelines[timeline]][key]['lensell10'].append(sum_count(pendingsell,lim=10))
+    #                 statistics[timelines[timeline]][key]['nextprice'].append(diff)
+    #                 statistics[timelines[timeline]][key]['gap'].append(gap)
+    #
+    #
+    #     # for v in timelines:
+    #     #     for st in statistics[v]['buy']:
+    #     #         plt.title(f'{ntimelines[timelines.index(v)]} - buy - {st}')
+    #     #         sns.distplot(statistics[v]['buy'][st])
+    #     #         plt.show()
+    #     #     for st in statistics[v]['sell']:
+    #     #         plt.title(f'{ntimelines[timelines.index(v)]} - sell - {st}')
+    #     #         sns.distplot(statistics[v]['sell'][st])
+    #     #         plt.show()
+    #
+    for st in stat:
+        plt.title(f'buy - {st}')
+        for v in timelines[:-1]:
+            sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10, label=ntimelines[timelines.index(v)])
+        plt.legend()
+        plt.show()
 
-
-
-
+        plt.title(f'sell - {st}')
+        for v in timelines[:-1]:
+            sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10, label=ntimelines[timelines.index(v)])
+        plt.legend()
+        plt.show()

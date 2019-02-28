@@ -86,8 +86,8 @@ class Order:
         :return:
         """
         s = f'{nanoseconds_to_time(self.otime)} ID: {self.id} O: {self.type} S: {self.stock}'
-        if self.type in ['A', 'F']:
-            s += f' B/S: {self.buy_sell} SZ: {self.osize} PR: {self.price}'
+        if self.type in ['A', 'F', 'U']:
+            s += f' B/S: {self.buy_sell} SZ: {self.size} PR: {self.price} OSZ: {self.osize}'
 
         if self.type in ['U']:
             s += f' OID: {self.oid}'

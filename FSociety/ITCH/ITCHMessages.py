@@ -55,6 +55,7 @@ class ITCHMessages:
         Opens the stream
         :return:
         """
+        print(f'Opening: {ITCH_days[self.year][self.day]}-{self.stock}')
         self.stream = gzip.open(f'{self.path}/Messages/{ITCH_days[self.year][self.day]}-{self.stock}-MESSAGES.csv.gz', 'rt')
         # self.stream = gzip.open(self.path + 'Messages/' + self.day + '-' + self.stock + '-MESSAGES.csv.gz', 'rt')
 

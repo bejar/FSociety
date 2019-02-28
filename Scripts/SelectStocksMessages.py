@@ -73,15 +73,14 @@ if __name__ == '__main__':
                             del dorders[record.ORN]
                         wfile.write(f'#{stock.strip()}#&{record.to_string()}\n')
 
-        # Replace orders have the old id order in oORN
-        if order in ['U']:
-            record = ITCHRecord(g)
-            if record.oORN in dorders:
-                stock = dorders[record.oORN]
-                if order == 'U':  # U orders replace active orders
+            # Replace orders have the old id order in oORN
+            if order in ['U']:
+                record = ITCHRecord(g)
+                if record.oORN in dorders:
+                    stock = dorders[record.oORN]
                     dorders[record.ORN] = dorders[record.oORN]
                     del dorders[record.oORN]
-                wfile.write(f'#{stock.strip()}#&{record.to_string()}\n')
+                    wfile.write(f'#{stock.strip()}#&{record.to_string()}\n')
 
             if order in ['P']:
                 record = ITCHRecord(g)
