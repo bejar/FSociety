@@ -185,7 +185,7 @@ class OrdersProcessor:
             ltimes.append((self.executed[id].otime, id))
 
         for _, id in sorted(ltimes):
-            print(self.executed[id].to_string(mode=mode))
+            print(self.executed[id].to_string(history=mode))
 
     def list_cancelled(self, mode='order'):
         """
@@ -198,5 +198,5 @@ class OrdersProcessor:
             ltimes.append((self.cancelled[id].otime, id))
 
         for _, id in sorted(ltimes):
-            print(self.cancelled[id].to_string(mode=mode))
+            print(self.cancelled[id].to_string(history=mode))
 

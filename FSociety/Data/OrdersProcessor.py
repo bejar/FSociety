@@ -64,6 +64,8 @@ class OrdersProcessor:
                 # If no shares left, move it to executed
                 if self.orders[order.id].size == 0:
                     self.executed[order.id] = self.orders.pop(order.id)
+                else:
+                    self.executed[order.id] = self.orders[order.id]
             # else:
             #     self.orders.pop(order.id)
 
@@ -139,14 +141,14 @@ class OrdersProcessor:
             if hft:
                 delta = self.executed[id].history_time_length()
                 if delta is not None and 0< delta < 1_000_000_000:
-                    print(self.executed[id].to_string(mode=mode))
+                    print(self.executed[id].to_string(history=mode))
                     for v in fdict:
                         if delta//v == 0:
                             fdict[v]+=1
                             break
                     t += 1
             else:
-                print(self.executed[id].to_string(mode=mode))
+                print(self.executed[id].to_string(history=mode))
                 t+=1
 
         if hft:
@@ -169,7 +171,7 @@ class OrdersProcessor:
             ltimes.append((self.cancelled[id].otime, id))
 
         for _, id in sorted(ltimes):
-            print(self.cancelled[id].to_string(mode=mode))
+            print(self.cancelled[id].to_string(history=mode))
 
 
     def list_pending_orders(self, mode='order'):
@@ -184,7 +186,7 @@ class OrdersProcessor:
             ltimes.append((self.orders[id].otime, id))
 
         for _, id in sorted(ltimes):
-            print(self.orders[id].to_string(mode=mode))
+            print(self.orders[id].to_string(history=mode))
             if self.orders[id].history:
                 if len(self.orders[id].history)>1:
                     print(self.orders[id].history_to_string())
@@ -217,12 +219,14 @@ if __name__ == '__main__':
     rfile.open()
     sorders = OrdersProcessor(history=True)
     for order in rfile.get_order():
-        # print(order.to_string())
-        print(order.to_string(mode=None))
+        # print(order.to_string(history=False))
         sorders.insert_order(order)
 
 
     #sorders.list_pending_orders()
+
+    for o in sorders.sorted_orders(otype='cancelled'):
+        print(o.to_string(history=True))
 
 
 

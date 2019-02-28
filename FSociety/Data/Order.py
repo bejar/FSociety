@@ -76,7 +76,7 @@ class Order:
         if self.type in ['P']:
             self.osize = int(data[6].strip())
 
-    def to_string(self, mode='order'):
+    def to_string(self, history=False):
         """
         returns a string representing an order
 
@@ -101,15 +101,15 @@ class Order:
         if self.type in ['X']:
             s += f' SX: {self.size}'
 
-        if mode == 'exec':
+        if history:
             s= f'{s}{self.history_to_string()}'
             # s = 'H: ' + self.history[-1][0] + ' ' + str(self.history[-1][1]) + ' <- ' + s
             # s = nanoseconds_to_time(self.history[-1][2]) + ' <- ' + s
 
-        if mode == 'cancel':
-            s= f'{s}{self.history_to_string()}'
-            # s = 'H: ' + self.history[-1][0] + ' ' + str(self.history[-1][1]) + ' <- ' + s
-            # s = nanoseconds_to_time(self.history[-1][2]) + ' <- ' + s
+        # if history == 'cancel':
+        #     s= f'{s}{self.history_to_string()}'
+        #     # s = 'H: ' + self.history[-1][0] + ' ' + str(self.history[-1][1]) + ' <- ' + s
+        #     # s = nanoseconds_to_time(self.history[-1][2]) + ' <- ' + s
 
 
         return s
@@ -149,7 +149,11 @@ class Order:
                     s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
                 if lasttype == 'D':
-                    s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
+                    h = f'HIST ----- {dt} D: {nanoseconds_to_time(delta)}\n'
+                    for o in self.history:
+                        h += f'D= {nanoseconds_to_time(o.otime - self.history[0].otime)}| {o.to_string()}\n'
+                    s += f'\n{h}'
+                    # s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'
 
                 if lasttype == 'U':
                     s += f'X DeltaT: {nanoseconds_to_time(delta)} -> {self.history[-1].to_string()}'

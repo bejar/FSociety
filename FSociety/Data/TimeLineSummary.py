@@ -94,7 +94,8 @@ def order_exec_analysis(year, day, stock, logging=False):
     for o in lopen:
         lorders.append((o.otime, 'O', o.id))
 
-    # Add to the list an executed order with the time of the last execution
+    # Add to the list an executed order with the time of all the partial
+    # executions and the last execution
     for o in lexecuted:
         lorders.append((o.otime, 'XI', o.id))
         # Partial executions
@@ -104,9 +105,14 @@ def order_exec_analysis(year, day, stock, logging=False):
         # Final execution
         lorders.append((o.history[-1].otime, f'XF', o.id))
 
-    # Add to the list a cancelled order with the time of the initial order and the time of the final cancellation
+    # Add to the list a cancelled order with the time of the initial order
+    # all the possible partial executions
+    # and the time of the final cancellation
     for o in lcancelled:
         lorders.append((o.otime, 'CI', o.id))
+        for xo in range(1, len(o.history)-1):
+            if o.history[xo].type in ['C', 'E']:
+                lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
         lorders.append((o.history[-1].otime, 'CF', o.id))
 
     lorders = sorted(lorders)
@@ -143,6 +149,7 @@ def order_exec_analysis(year, day, stock, logging=False):
         else:  # it is an execution
 
             # If is a final execution the code is 'XF', else it has a number attached
+            # The final execution eliminates the price from the order book
             if len(op) == 2:
                 if sorders.executed[id].buy_sell == 'B':
                     cbuy.subtract([sorders.executed[id].price])
@@ -162,7 +169,7 @@ def order_exec_analysis(year, day, stock, logging=False):
                 if logging:
                     print(f'******************************************** {op[2:]}')
                     print(f'ID: {id}')
-                    print(sorders.executed[id].to_string(mode='exec'))
+                    print(sorders.executed[id].to_string(history=True))
                 if sorders.executed[id].buy_sell == 'B':
                     if logging:
                         print(f'BUY: {sorders.executed[id].price} / {bestsell - sorders.executed[id].price}')
