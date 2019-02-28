@@ -46,8 +46,8 @@ def sum_count(count, lim=0):
 __author__ = 'bejar'
 
 timelines = [10_000_000_000, 1_000_000_000, 100_000_000, 10_000_000, 1_000_000, 100_000, 10_000, 0]
-ntimelines = ['>10sec', '>1 sec', '>100 msec', '> 10 msec', '> 1 msec', '> 100 mc sec', '> 10 mc sec', '>10 mc sec']
-stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'nextprice']
+ntimelines = ['inf-10s', '10s-1s', '1s-100ms', '100ms-10ms', '10ms-1ms', '1ms-100 mcs', '100mcs-10mcs', '10mcs-0']
+stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'otherprice']
 
 
 def in_timeline(v):
@@ -62,7 +62,7 @@ def in_timeline(v):
             return i
 
 
-def do_the_job(year, day, stock, logging=False):
+def order_exec_analysis(year, day, stock, logging=False):
     """
 
     :param year:
@@ -178,7 +178,7 @@ def do_the_job(year, day, stock, logging=False):
                 statistics[timelines[timeline]][key]['lensell5'].append(sum_count(pendingsell, lim=5))
                 statistics[timelines[timeline]][key]['lenbuy10'].append(sum_count(pendingbuy, lim=10))
                 statistics[timelines[timeline]][key]['lensell10'].append(sum_count(pendingsell, lim=10))
-                statistics[timelines[timeline]][key]['nextprice'].append(diff)
+                statistics[timelines[timeline]][key]['otherprice'].append(diff)
                 statistics[timelines[timeline]][key]['gap'].append(gap)
 
     return statistics
@@ -193,7 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('--log', help="Prints order executions", action='store_true', default=False)
     args = parser.parse_args()
 
-    statistics = do_the_job(args.year, args.day, args.stock, logging=args.log)
+    statistics = order_exec_analysis(args.year, args.day, args.stock, logging=args.log)
 
     #     rfile = ITCHMessages(year, day, stock)
     #     rfile.open()
