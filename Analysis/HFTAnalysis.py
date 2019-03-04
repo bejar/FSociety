@@ -23,8 +23,18 @@ from FSociety.Config import datapath, ITCH_days
 from FSociety.Data import Stock
 from FSociety.Util import now
 import pickle
+from FSociety.Data.TimeLineSummary import timelines, ntimelines, stat
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 __author__ = 'bejar'
+
+
+def save_analysis(year, day, stock):
+    statistics = order_exec_analysis(year, day, stock, logging=args.log)
+    wfile = open(f'{analysispath}/{ITCH_days[year][day]}-{stock}-HFTStatistics.pkl', 'wb')
+    pickle.dump(statistics, wfile)
+    wfile.close()
 
 
 if __name__ == '__main__':
@@ -33,6 +43,9 @@ if __name__ == '__main__':
     parser.add_argument('--nstocks', help="Number of stocks to analyze", type=int, default=50)
     parser.add_argument('--init', help="Initial Day", type=int, default=0)
     parser.add_argument('--log', help="Prints order executions", action='store_true', default=False)
+    parser.add_argument('--day', help="One specific dat", type=int, default=None)
+    parser.add_argument('--stock', help="One specific stock", default=None)
+    parser.add_argument('--istock', help="Number of stocks to analyze", type=int, default=0)
 
     args = parser.parse_args()
     year = str(args.year)
@@ -47,13 +60,36 @@ if __name__ == '__main__':
         # lfiles = [f'{day}.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
         analysispath = datapath + '/Analysis'
 
-    for day in range(len(ITCH_days[args.year])):
-        now()
-        print(f'DAY: {ITCH_days[args.year][day]}')
-        for stock in sstocks.get_list_stocks():
-            print(f'STOCK= {stock}')
-            statistics = order_exec_analysis(args.year, day, stock, logging=args.log)
-            wfile = open(f'{analysispath}/{ITCH_days[args.year][day]}-{stock}-HFTStatistics.pkl', 'wb')
-            pickle.dump(statistics, wfile)
-            wfile.close()
+    if args.day is None:
+        for day in range(args.init, len(ITCH_days[args.year])):
+            now()
+            print(f'DAY: {ITCH_days[args.year][day]}')
+            for stock in sstocks.get_list_stocks()[args.istock:]:
+                print(f'STOCK= {stock}')
+                save_analysis(args.year, day, stock)
 
+
+    else:
+        print(f'DAY: {ITCH_days[args.year][args.day]}')
+        if args.stock is None:
+            raise NameError('The stock is missing')
+        print(f'STOCK= {args.stock}')
+        statistics = order_exec_analysis(args.year, args.day, args.stock, logging=args.log)
+        wfile = open(f'{analysispath}/{ITCH_days[args.year][args.day]}-{args.stock}-HFTStatistics.pkl', 'wb')
+        pickle.dump(statistics, wfile)
+        wfile.close()
+
+        for st in stat:
+            plt.title(f'buy - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
+            for v in timelines[:-1]:
+                sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10,
+                             label=ntimelines[timelines.index(v)])
+            plt.legend()
+            plt.show()
+
+            plt.title(f'sell - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
+            for v in timelines[:-1]:
+                sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10,
+                             label=ntimelines[timelines.index(v)])
+            plt.legend()
+            plt.show()

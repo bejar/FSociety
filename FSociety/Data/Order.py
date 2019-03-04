@@ -34,7 +34,7 @@ class Order:
     otime = 0
     price = 0
     size = 0
-    history = []
+    history = None
     summary = None
     # status = None
 

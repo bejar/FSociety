@@ -31,7 +31,6 @@ import pickle
 
 __author__ = 'bejar'
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', help="Anyo del analisis", default='2017G')
@@ -51,21 +50,22 @@ if __name__ == '__main__':
         # lfiles = [f'{day}.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
         analysispath = datapath + '/Analysis'
 
-
-    rfile = open(f'{analysispath}/{ITCH_days[args.year][day]}-{stock}-HFTStatistics.pkl','rb')
+    rfile = open(f'{analysispath}/{ITCH_days[args.year][day]}-{stock}-HFTStatistics.pkl', 'rb')
     statistics = pickle.load(rfile)
     rfile.close()
 
-
+    print(f'DAY: {ITCH_days[args.year][day]} STOCK {stock}')
     for st in stat:
-        plt.title(f'buy - {st}')
+        plt.title(f'buy - {st} / DAY: {ITCH_days[args.year][day]} STOCK: {stock}')
         for v in timelines[:-1]:
-            sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10, label=ntimelines[timelines.index(v)])
+            sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10,
+                         label=ntimelines[timelines.index(v)])
         plt.legend()
         plt.show()
 
-        plt.title(f'sell - {st}')
+        plt.title(f'sell - {st} / DAY: {ITCH_days[args.year][day]} STOCK: {stock}')
         for v in timelines[:-1]:
-            sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10, label=ntimelines[timelines.index(v)])
+            sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10,
+                         label=ntimelines[timelines.index(v)])
         plt.legend()
         plt.show()

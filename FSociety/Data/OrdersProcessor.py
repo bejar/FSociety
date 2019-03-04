@@ -27,10 +27,10 @@ class OrdersProcessor:
 
     Each element stores the stock tick and the time of the order
     """
-    orders = {} # Dictionary for active orders
-    cancelled = None # Dictionary for cancelled orders
-    executed = None # Dictionary for executed orders
-    full_history = False # Whether cancellations and executions are also recorded
+    orders = None  # Dictionary for active orders
+    cancelled = None  # Dictionary for cancelled orders
+    executed = None  # Dictionary for executed orders
+    full_history = False  # Whether cancellations and executions are also recorded
 
     def __init__(self, history=False):
         """
@@ -39,6 +39,7 @@ class OrdersProcessor:
         for individual stocks)
         """
         self.full_history = history
+        self.orders = {}
         if self.full_history:
             self.cancelled = {}  # Dictionary for cancelled orders
             self.executed = {}  # Dictionary for executed orders
@@ -210,7 +211,7 @@ class OrdersProcessor:
 
 
 if __name__ == '__main__':
-    from FSociety.ITCH import ITCHv5, ITCHRecord, ITCHtime, ITCHMessages
+    from FSociety.ITCH import ITCHMessages
 
     year = '2017G'
     day = 0

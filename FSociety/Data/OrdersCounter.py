@@ -27,12 +27,12 @@ __author__ = 'bejar'
 
 class OrdersCounter:
 
-    countertime = {}
-    countervalue = {}
-    countertick = {}
-    counter = {}
+    countertime = None
+    countervalue = None
+    countertick = None
+    counter = None
     order_types = ('A', 'F', 'E', 'U', 'C', 'D', 'X')
-    selected = []
+    selected = None
     precision = 3
     granularities = {'mcs': (1000, 5), 'ms': (1000000, 4), 's': (1000000000, 3), 'm': (60000000000, 2)}
     granularity = 1000000000

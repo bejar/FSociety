@@ -28,10 +28,10 @@ class ITCHMessages:
     Streams the orders from a csv MESSAGES file processed from an ITCH file
     """
 
-    path = ''
-    year = ''
+    path = None
+    year = None
     day = 0
-    stock = ''
+    stock = None
     stream = None
 
     def __init__(self, year='2017G', day=0, stock='AAPL'):

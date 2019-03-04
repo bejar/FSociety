@@ -29,7 +29,7 @@ class MPI():
         """
         Reads the MPI names from a file and stores it in a dictionary
         """
-        dnames = {}
+        dnames = None
 
         f = open(datapath + '/Data/mpidlist.txt','r')
 
