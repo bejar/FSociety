@@ -158,14 +158,21 @@ def order_exec_analysis(year, day, stock, logging=False):
 
             pendingbuy = sorted([v for v in cbuy.items() if v[1] > 0], reverse=True)
             pendingsell = sorted([v for v in csell.items() if v[1] > 0])
-            bestbuy = pendingbuy[0][0]
-            bestsell = pendingsell[0][0]
+            if len(pendingbuy) > 0:
+                bestbuy = pendingbuy[0][0]
+            else:
+                bestbuy = -1
+            if len(pendingsell) >0:
+                bestsell = pendingsell[0][0]
+            else:
+                bestsell = -1
 
             if len(op) == 2:
                 timeline = in_timeline(sorders.executed[id].history_time_length())
             else:
                 timeline = in_timeline(sorders.executed[id].history_time_length(dist=int(op[2:])))
-            if timeline >= 0:
+
+            if timeline >= 0 and bestsell != -1 and bestbuy != -1:
                 if logging:
                     print(f'******************************************** {op[2:]}')
                     print(f'ID: {id}')

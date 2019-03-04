@@ -25,6 +25,7 @@ from FSociety.Config import datapath, ITCH_days
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from FSociety.Data.TimeLineSummary import timelines, ntimelines, stat
 
 import pickle
 
@@ -51,9 +52,12 @@ if __name__ == '__main__':
         analysispath = datapath + '/Analysis'
 
 
-    statistics = pickle.load(f'{analysispath}/{ITCH_dats[args.year][day]}-{stock}-HFTStatistics.pkl')
+    rfile = open(f'{analysispath}/{ITCH_days[args.year][day]}-{stock}-HFTStatistics.pkl','rb')
+    statistics = pickle.load(rfile)
+    rfile.close()
 
-    for st in statistics:
+
+    for st in stat:
         plt.title(f'buy - {st}')
         for v in timelines[:-1]:
             sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10, label=ntimelines[timelines.index(v)])
