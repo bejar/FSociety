@@ -31,8 +31,9 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Anyo del analisis", default='2017G')
-    parser.add_argument('--nstocks', help="Anyo del analisis", default=50)
+    parser.add_argument('--year', help="Year of the analysis", default='2017G')
+    parser.add_argument('--nstocks', help="Number of stocks to analyze", type=int, default=50)
+    parser.add_argument('--init', help="Initial Day", type=int, default=0)
 
     args = parser.parse_args()
     year = str(args.year)
@@ -46,7 +47,7 @@ if __name__ == '__main__':
         lfiles = [f'{day}.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
 
     # for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
-    for filename, dname in zip(lfiles, ITCH_days[year]):
+    for filename, dname in zip(lfiles[args.init:], ITCH_days[year][args.init:]):
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)

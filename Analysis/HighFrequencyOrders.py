@@ -36,24 +36,15 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Anyo del analisis", default=None)
-    parser.add_argument('--day', help="dia del anyo", default=None)
-    parser.add_argument('--stock', help="Stock del analisis", default=None)
+    parser.add_argument('--year', help="Anyo del analisis", default='2017G')
+    parser.add_argument('--day', help="dia del anyo", type=int, default=0)
+    parser.add_argument('--stock', help="Stock del analisis", default='GOOGL')
 
     args = parser.parse_args()
     year = args.year
     stock = args.stock
+    day = args.day
 
-    if year is None:
-        year = '2017G'
-
-    if args.day is None:
-        day = 0
-    else:
-        day = int(args.day)
-
-    if stock is None:
-        stock = 'MSFT'
 
     # if 'G' in year:
     #     datapath = datapath + '/GIS/'

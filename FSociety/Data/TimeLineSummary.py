@@ -213,7 +213,7 @@ if __name__ == '__main__':
 
     statistics = order_exec_analysis(args.year, args.day, args.stock, logging=args.log)
 
-    # for st in stat:
+    # for st in statistics:
     #     plt.title(f'buy - {st}')
     #     for v in timelines[:-1]:
     #         sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10, label=ntimelines[timelines.index(v)])
