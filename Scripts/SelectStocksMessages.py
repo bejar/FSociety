@@ -29,25 +29,7 @@ from FSociety.Config import datapath, ITCH_days
 
 __author__ = 'bejar'
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Year of the analysis", default='2017G')
-    parser.add_argument('--nstocks', help="Number of stocks to analyze", type=int, default=50)
-    parser.add_argument('--init', help="Initial Day", type=int, default=0)
-
-    args = parser.parse_args()
-    year = str(args.year)
-    sstocks = Stock(num=args.nstocks)
-    print(len(sstocks.sstocks))
-
-    if 'G' in year:
-        lfiles = [f'/S{day}-v50.txt.gz' for day in ITCH_days[year]]
-        datapath = datapath + '/GIS/'
-    else:
-        lfiles = [f'{day}.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
-
-    # for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
-    for filename, dname in zip(lfiles[args.init:], ITCH_days[year][args.init:]):
+def process_messages(filename, dname):
         now()
         i = 0
         dataset = ITCHv5(datapath + filename)
@@ -70,7 +52,7 @@ if __name__ == '__main__':
                 if record.ORN in dorders:
                     stock = dorders[record.ORN]
                     if stock in sstocks.sstocks:
-                        if order== 'D':
+                        if order == 'D':
                             del dorders[record.ORN]
                         wfile.write(f'#{stock.strip()}#&{record.to_string()}\n')
 
@@ -103,3 +85,36 @@ if __name__ == '__main__':
             os.system(' zcat ' + datapath + '/Results/' + dname + '-STOCK-MESSAGES.csv.gz |grep \'#'
                       + stock + '#' + '\' > ' + datapath + '/Messages/' + dname + '-' + stock + '-MESSAGES.csv')
             os.system('  gzip ' + datapath + '/Messages/' + dname + '-' + stock + '-MESSAGES.csv')
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--year', help="Year of the analysis", default='2017G')
+    parser.add_argument('--nstocks', help="Number of stocks to analyze", type=int, default=50)
+    parser.add_argument('--init', help="Initial Day", type=int, default=0)
+    parser.add_argument('--stock', help="Specific Stock", default=None)
+    parser.add_argument('--day', help="Specific Day", type=int, default=0)
+
+    args = parser.parse_args()
+    year = str(args.year)
+    sstocks = Stock(num=args.nstocks)
+    print(len(sstocks.sstocks))
+
+    if 'G' in year:
+        lfiles = [f'/S{day}-v50.txt.gz' for day in ITCH_days[year]]
+        datapath = datapath + '/GIS/'
+    else:
+        lfiles = [f'{day}.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
+
+    if args.stock is None:
+        # for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
+        for filename, dname in zip(lfiles[args.init:], ITCH_days[year][args.init:]):
+            process_messages(filename,dname)
+    else:
+        filename = lfiles[args.day]
+        dname = ITCH_days[year][args.day]
+        process_messages(filename,dname)
+
+
+

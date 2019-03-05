@@ -229,26 +229,26 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', help="Anyo del analisis", default='2017G')
-    parser.add_argument('--day', help="dia del anyo", type=int, default=0)
-    parser.add_argument('--stock', help="Stock del analisis", default='GOOGL')
+    parser.add_argument('--day', help="dia del anyo", type=int, default=2)
+    parser.add_argument('--stock', help="Stock del analisis", default='AMD')
     parser.add_argument('--log', help="Prints order executions", action='store_true', default=False)
     args = parser.parse_args()
 
-    sstocks = Stock(num=50)
-    for stock in sstocks.get_list_stocks():
-        statistics = order_exec_analysis(args.year, args.day, stock, logging=args.log)
+    # sstocks = Stock(num=50)
+    # for stock in sstocks.get_list_stocks():
+    statistics = order_exec_analysis(args.year, args.day, args.stock, logging=args.log)
 
-        for st in stat:
-            plt.title(f'buy - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {stock}')
-            for v in timelines[:-1]:
-                sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10,
-                             label=ntimelines[timelines.index(v)])
-            plt.legend()
-            plt.show()
+    for st in stat:
+        plt.title(f'buy - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
+        for v in timelines[:-1]:
+            sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10,
+                         label=ntimelines[timelines.index(v)])
+        plt.legend()
+        plt.show()
 
-            plt.title(f'sell - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {stock}')
-            for v in timelines[:-1]:
-                sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10,
-                             label=ntimelines[timelines.index(v)])
-            plt.legend()
-            plt.show()
+        plt.title(f'sell - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
+        for v in timelines[:-1]:
+            sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10,
+                         label=ntimelines[timelines.index(v)])
+        plt.legend()
+        plt.show()

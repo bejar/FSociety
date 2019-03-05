@@ -65,5 +65,4 @@ class ITCHMessages:
         :return:
         """
         for item in self.stream:
-            # print(item)
             yield Order(item)
