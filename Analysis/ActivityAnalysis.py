@@ -246,14 +246,14 @@ def log_process(statistics,log=False):
     if log:
         print('N Buy orders:', len(statistics['buy']['ordertime']))
         print('N Sell orders:', len(statistics['sell']['ordertime']))
-        print('N Order Executions Sell:', len(statistics['sell']['executiontime']))
-        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['sell']['executiontime'])))
-        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['sell']['executiontime'])))
-        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['sell']['executiontime'])))
-        print('N Order Executions Buy:', len(statistics['buy']['executiontime']))
-        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['buy']['executiontime'])))
-        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['buy']['executiontime'])))
-        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['buy']['executiontime'])))
+        print('N Order Executions Sell:', len(statistics['sell']['executiondeltatime']))
+        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['sell']['executiondeltatime'])))
+        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['sell']['executiondeltatime'])))
+        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['sell']['executiondeltatime'])))
+        print('N Order Executions Buy:', len(statistics['buy']['executiondeltatime']))
+        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['buy']['executiondeltatime'])))
+        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['buy']['executiondeltatime'])))
+        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['buy']['executiondeltatime'])))
 
 def save_statistics(statistics, year, day, stock):
     """
