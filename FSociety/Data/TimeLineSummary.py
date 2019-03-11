@@ -148,15 +148,17 @@ def order_exec_analysis(year, day, stock, logging=False):
         else:  # it is an execution
 
             # If is a final execution the code is 'XF', else it has a number attached
-            # The final execution eliminates the price from the order book
+            # The final execution eliminates the price from the order book so the first now is the second best price
             if len(op) == 2:
                 if sorders.executed[orderid].buy_sell == 'B':
                     cbuy[sorders.executed[orderid].price] -= 1
                 else:
                     csell[sorders.executed[orderid].price] -= 1
+
             pendingbuy = sorted([v for v in cbuy.items() if v[1] > 0], reverse=True)
             pendingsell = sorted([v for v in csell.items() if v[1] > 0])
 
+            # Checks if the queues are empty
             if len(pendingbuy) > 0:
                 bestbuy = pendingbuy[0][0]
             else:
@@ -175,30 +177,48 @@ def order_exec_analysis(year, day, stock, logging=False):
 
             # print(f'{sorders.executed[orderid].price} {pendingbuy[0]} {pendingsell[0]}')
 
+            # If any of the queues is empty the statistics make no sense so they are not computed
             if (timeline >= 0) and (bestsell != -1) and (bestbuy != -1):
+
                 if logging:
                     print(f'******************************************** {op[2:]}')
                     print(f'ID: {orderid}')
                     print(sorders.executed[orderid].to_string(history=True))
 
+                # Get the execution order
+                if len(op) == 2:
+                    exorder = sorders.executed[orderid].history[-1]
+                else:
+                    exorder = sorders.executed[orderid].history[int(op[2:])]
+
+                # Get the price of the executed order (if the type is C then it is an execution with price)
+                if exorder.type == 'C':
+                    exprice = exorder.price
+                    # if logging:
+                    #     print(f'####################### Executed with price {exprice} but price was {sorders.executed[orderid].price}')
+                else:
+                    exprice = sorders.executed[orderid].price
+
+                # gap - the difference between the price of the execution and the best price of the other side
+                # diff - the difference between the price of the execution and the second best price
                 if sorders.executed[orderid].buy_sell == 'B':
                     buy_sell = 'buy'
-                    gap = bestsell - sorders.executed[orderid].price
-                    diff = sorders.executed[orderid].price - bestbuy
+                    gap = bestsell - exprice
+                    diff = exprice - bestbuy
                     if logging:
-                        print(f'BUY: {sorders.executed[orderid].price} / GAP: {gap} / DIFF: {diff}')
+                        print(f'BUY: {exprice} / GAP: {gap:3.2f} / DIFF: {diff:3.2f}')
                         if gap < 0 or diff < 0:
                             print(f'?????????????????????????????????????????????????????????????')
-                            print(f'P:{sorders.executed[orderid].price} BS: {bestsell} BB: {bestbuy}')
+                            print(f'P:{exprice} BS: {bestsell} BB: {bestbuy}')
                 else:
                     buy_sell = 'sell'
-                    gap = sorders.executed[orderid].price - bestbuy
-                    diff = bestsell - sorders.executed[orderid].price
+                    gap = exprice - bestbuy
+                    diff = bestsell - exprice
                     if logging:
-                        print(f'SELL: {sorders.executed[orderid].price} / GAP: {gap} / DIFF: {diff}')
+                        print(f'SELL: {exprice} / GAP: {gap:3.2f} / DIFF: {diff:3.2f}')
                         if gap < 0 or diff < 0:
                             print(f'?????????????????????????????????????????????????????????????')
-                            print(f'P:{sorders.executed[orderid].price} BS: {bestsell} BB: {bestbuy}')
+                            print(f'P:{exprice} BS: {bestsell} BB: {bestbuy}')
 
                 if logging:
                     print(f'QSELL5={pendingsell[:5]}')
@@ -230,25 +250,26 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', help="Anyo del analisis", default='2017G')
     parser.add_argument('--day', help="dia del anyo", type=int, default=2)
-    parser.add_argument('--stock', help="Stock del analisis", default='AMD')
+    parser.add_argument('--stock', help="Stock del analisis", default='GOOGL')
     parser.add_argument('--log', help="Prints order executions", action='store_true', default=False)
     args = parser.parse_args()
 
     # sstocks = Stock(num=50)
     # for stock in sstocks.get_list_stocks():
+    args.log = True
     statistics = order_exec_analysis(args.year, args.day, args.stock, logging=args.log)
 
-    for st in stat:
-        plt.title(f'buy - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
-        for v in timelines[:-1]:
-            sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10,
-                         label=ntimelines[timelines.index(v)])
-        plt.legend()
-        plt.show()
-
-        plt.title(f'sell - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
-        for v in timelines[:-1]:
-            sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10,
-                         label=ntimelines[timelines.index(v)])
-        plt.legend()
-        plt.show()
+    # for st in stat:
+    #     plt.title(f'buy - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
+    #     for v in timelines[:-1]:
+    #         sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10,
+    #                      label=ntimelines[timelines.index(v)])
+    #     plt.legend()
+    #     plt.show()
+    #
+    #     plt.title(f'sell - {st} / DAY: {ITCH_days[args.year][args.day]} STOCK: {args.stock}')
+    #     for v in timelines[:-1]:
+    #         sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10,
+    #                      label=ntimelines[timelines.index(v)])
+    #     plt.legend()
+    #     plt.show()

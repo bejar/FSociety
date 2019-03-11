@@ -36,6 +36,8 @@ if __name__ == '__main__':
     parser.add_argument('--year', help="Anyo del analisis", default='2017G')
     parser.add_argument('--day', help="dia del anyo", type=int, default=0)
     parser.add_argument('--stock', help="Stock del analisis", default='GOOGL')
+    parser.add_argument('--kde', help="Show Kernel Density Estimation", action='store_true', default=False)
+    parser.add_argument('--bins', help="Number of histogram bins", type=int, default=10)
 
     args = parser.parse_args()
     year = args.year
@@ -58,14 +60,14 @@ if __name__ == '__main__':
     for st in stat:
         plt.title(f'buy - {st} / DAY: {ITCH_days[args.year][day]} STOCK: {stock}')
         for v in timelines[:-1]:
-            sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=10,
+            sns.distplot(statistics[v]['buy'][st], hist=True, norm_hist=True, bins=args.bins,kde=args.kde, 
                          label=ntimelines[timelines.index(v)])
         plt.legend()
         plt.show()
 
         plt.title(f'sell - {st} / DAY: {ITCH_days[args.year][day]} STOCK: {stock}')
         for v in timelines[:-1]:
-            sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=10,
+            sns.distplot(statistics[v]['sell'][st], hist=True, norm_hist=True, bins=args.bins,kde=args.kde, 
                          label=ntimelines[timelines.index(v)])
         plt.legend()
         plt.show()

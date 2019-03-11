@@ -123,6 +123,10 @@ class OrdersProcessor:
     def query_id(self, id):
         if id in self.orders:
             return self.orders[id]
+        elif (self.cancelled is not None) and (id in self.cancelled):
+            return self.cancelled[id]
+        elif (self.executed is not None) and (id in self.executed):
+            return self.executed[id]
         else:
             return None
 

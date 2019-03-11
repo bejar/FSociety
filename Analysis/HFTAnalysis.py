@@ -39,7 +39,7 @@ def save_analysis(year, day, stock):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--year', help="Year of the analysis", default='2017G')
+    parser.add_argument('--year', help="Year of the analysis", type=str, default='2017G')
     parser.add_argument('--nstocks', help="Number of stocks to analyze", type=int, default=50)
     parser.add_argument('--init', help="Initial Day", type=int, default=0)
     parser.add_argument('--log', help="Prints order executions", action='store_true', default=False)
@@ -48,9 +48,8 @@ if __name__ == '__main__':
     parser.add_argument('--istock', help="Number of stocks to analyze", type=int, default=0)
 
     args = parser.parse_args()
-    year = str(args.year)
+    year = args.year
     sstocks = Stock(num=args.nstocks)
-    print(len(sstocks.sstocks))
 
     if 'G' in year:
         # lfiles = [f'/S{day}-v50.txt.gz' for day in ITCH_days[year]]
@@ -67,7 +66,6 @@ if __name__ == '__main__':
             for stock in sstocks.get_list_stocks()[args.istock:]:
                 print(f'STOCK= {stock}')
                 save_analysis(args.year, day, stock)
-
 
     else:
         print(f'DAY: {ITCH_days[args.year][args.day]}')

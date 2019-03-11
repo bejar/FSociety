@@ -93,8 +93,7 @@ if __name__ == '__main__':
     parser.add_argument('--year', help="Year of the analysis", default='2017G')
     parser.add_argument('--nstocks', help="Number of stocks to analyze", type=int, default=50)
     parser.add_argument('--init', help="Initial Day", type=int, default=0)
-    parser.add_argument('--stock', help="Specific Stock", default=None)
-    parser.add_argument('--day', help="Specific Day", type=int, default=0)
+    parser.add_argument('--day', help="Specific Day", type=int, default=None)
 
     args = parser.parse_args()
     year = str(args.year)
@@ -107,7 +106,7 @@ if __name__ == '__main__':
     else:
         lfiles = [f'{day}.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]
 
-    if args.stock is None:
+    if args.day is None:
         # for filename in [day + '.NASDAQ_ITCH50.gz' for day in ITCH_days[year]]:
         for filename, dname in zip(lfiles[args.init:], ITCH_days[year][args.init:]):
             process_messages(filename,dname)
