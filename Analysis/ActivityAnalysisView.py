@@ -45,30 +45,30 @@ def plot_statistics(statistics):
     :return:
     """
     fig = plt.figure(figsize=(12, 8))
-    ax = sns.distplot(np.log10(statistics['sell']['executiondeltatime']), kde=True, norm_hist=True)
+    ax = sns.distplot(np.log10(statistics['sell']['executiondeltatime']), kde=args.kde, bins=args.bins, norm_hist=True)
     plot_tscale()
     plt.title(f'Log plot of Sell execution delta time {itchday} {args.stock}', fontsize=20)
     plt.show()
 
     fig = plt.figure(figsize=(12, 8))
-    ax = sns.distplot(capped_prices(statistics['sell']['executionprice']), kde=True, norm_hist=True)
-    plt.title(f'Orders Sell price {itchday} {args.stock}', fontsize=20)
+    ax = sns.distplot(capped_prices(statistics['sell']['executionprice']), kde=args.kde, bins=args.bins, norm_hist=True)
+    plt.title(f'Orders Sell execution price {itchday} {args.stock}', fontsize=20)
     plt.show()
 
     fig = plt.figure(figsize=(12, 8))
-    ax = sns.distplot(np.log10(statistics['buy']['executiondeltatime']), kde=True, norm_hist=True)
+    ax = sns.distplot(np.log10(statistics['buy']['executiondeltatime']), kde=args.kde, bins=args.bins, norm_hist=True)
     plot_tscale()
     plt.title(f'Log plot of Buy execution time {itchday} {args.stock}', fontsize=20)
     plt.show()
 
     fig = plt.figure(figsize=(12, 8))
-    ax = sns.distplot(capped_prices(statistics['buy']['executionprice']), kde=True, norm_hist=True)
-    plt.title(f'Orders Buy price {itchday} {args.stock}', fontsize=20)
+    ax = sns.distplot(capped_prices(statistics['buy']['executionprice']), kde=args.kde, bins=args.bins, norm_hist=True)
+    plt.title(f'Orders Buy execution price {itchday} {args.stock}', fontsize=20)
     plt.show()
 
     fig = plt.figure(figsize=(12, 8))
-    ax = sns.distplot(np.log10(statistics['buy']['deletedeltatime']), kde=True, norm_hist=True, label='Buy')
-    ax = sns.distplot(np.log10(statistics['sell']['deletedeltatime']), kde=True, norm_hist=True, label='Sell')
+    ax = sns.distplot(np.log10(statistics['buy']['deletedeltatime']), kde=args.kde, bins=args.bins, norm_hist=True, label='Buy')
+    ax = sns.distplot(np.log10(statistics['sell']['deletedeltatime']), kde=args.kde, bins=args.bins, norm_hist=True, label='Sell')
     plot_tscale()
     plt.legend()
     plt.title(f'Log plot of deletion time (Buy/Sell) {itchday} {args.stock}', fontsize=20)
@@ -85,7 +85,7 @@ def plot_statistics(statistics):
                       label='Del Sell')
     plt.legend()
     plot_tscale()
-    plt.title(f'Sell/Buy/Deletion time {itchday} {args.stock}', fontsize=20)
+    plt.title(f'ExSell/ExBuy/Deletion time {itchday} {args.stock}', fontsize=20)
     plt.show()
 
     fig = plt.figure(figsize=(12, 8))
@@ -97,8 +97,8 @@ def plot_statistics(statistics):
     plt.show()
 
     fig = plt.figure(figsize=(12, 8))
-    ax = sns.distplot(capped_prices(statistics['sell']['ordersize']), kde=False, hist=True, color='r', label='Sell')
-    ax = sns.distplot(capped_prices(statistics['buy']['ordersize']), kde=False, hist=True, color='g', label='Buy')
+    ax = sns.distplot(capped_prices(statistics['sell']['ordersize']), kde=False, bins=args.bins, hist=True, color='r', label='Sell')
+    ax = sns.distplot(capped_prices(statistics['buy']['ordersize']), kde=False, bins=args.bins, hist=True, color='g', label='Buy')
     plt.title(f'Sell/Buy orders sizes distribution {itchday} {args.stock}', fontsize=20)
     plt.legend()
     plt.show()
@@ -113,9 +113,9 @@ def plot_statistics(statistics):
     plt.show()
 
     fig = plt.figure(figsize=(12, 8))
-    ax = sns.distplot(capped_prices(statistics['sell']['executionsize']), kde=False, hist=True, color='r',
+    ax = sns.distplot(capped_prices(statistics['sell']['executionsize']), kde=False, bins=args.bins, hist=True, color='r',
                       label='Sell')
-    ax = sns.distplot(capped_prices(statistics['buy']['executionsize']), kde=False, hist=True, color='g',
+    ax = sns.distplot(capped_prices(statistics['buy']['executionsize']), kde=False, bins=args.bins, hist=True, color='g',
                       label='Buy')
     plt.title(f'Sell/Buy execution sizes distribution {itchday} {args.stock}', fontsize=20)
     plt.legend()
@@ -139,6 +139,7 @@ if __name__ == '__main__':
     parser.add_argument('--day', help="dia del anyo", type=int, default=0)
     parser.add_argument('--stock', help="Stock del analisis", default='GOOGL')
     parser.add_argument('--kde', help="Show Kernel Density Estimation", action='store_true', default=False)
+    parser.add_argument('--log', help="some logging", action='store_true', default=False)
     parser.add_argument('--bins', help="Number of histogram bins", type=int, default=10)
 
     args = parser.parse_args()
@@ -155,4 +156,18 @@ if __name__ == '__main__':
     rfile = open(f'{analysispath}/{ITCH_days[args.year][args.day]}-{args.stock}-ActivityStatistics.pkl', 'rb')
     statistics = pickle.load(rfile)
     rfile.close()
+
+    if args.log:
+        print('N Buy orders:', len(statistics['buy']['ordertime']))
+        print('N Sell orders:', len(statistics['sell']['ordertime']))
+        print('N Order Executions Sell:', len(statistics['sell']['executiondeltatime']))
+        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['sell']['executiondeltatime'])))
+        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['sell']['executiondeltatime'])))
+        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['sell']['executiondeltatime'])))
+        print('N Order Executions Buy:', len(statistics['buy']['executiondeltatime']))
+        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['buy']['executiondeltatime'])))
+        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['buy']['executiondeltatime'])))
+        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['buy']['executiondeltatime'])))
+
+
     plot_statistics(statistics)

@@ -18,10 +18,9 @@ OrdersActivityCounts
 """
 import argparse
 from FSociety.Config import datapath, ITCH_days
-from FSociety.Util import nanoseconds_to_time, capped_prices
+from FSociety.Util import nanoseconds_to_time, capped_prices, now, time_to_nanoseconds
 from FSociety.ITCH import ITCHtime, ITCHMessages
 from FSociety.Data import Stock, OrdersProcessor
-
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -81,9 +80,10 @@ def order_statistics(year, day, stock):
     for order in rfile.get_order():
         sorders.insert_order(order)
 
-        if order.type in ['F', 'A', 'U']:
-            norders += 1
-            if 0.5 < order.price < 1000:
+        if not args.market or (time_to_nanoseconds(9,30) < order.otime < time_to_nanoseconds(16)):
+            if order.type in ['F', 'A', 'U']:
+                norders += 1
+                # if 0 < order.price < 5000:
                 if order.buy_sell == 'S':
                     statistics['sell']['ordersize'].append(order.size)
                     statistics['sell']['ordertime'].append(order.otime)
@@ -93,46 +93,46 @@ def order_statistics(year, day, stock):
                     statistics['buy']['ordertime'].append(order.otime)
                     statistics['buy']['orderprice'].append(order.price)
 
-        # If is a cancel/replace order consider also a deletion
-        if order.type in ['U']:
-            trans = sorders.query_id(order.oid)
-            if order.buy_sell == 'S':
-                statistics['sell']['deletedeltatime'].append(order.otime - trans.otime)
-            else:
-                statistics['buy']['deletedeltatime'].append(order.otime - trans.otime)
-
-        # Computes the time between placing and order and canceling it
-        if order.type == 'D':
-            trans = sorders.query_id(order.id)
-            if trans is not None:
-                if trans.buy_sell == 'S':
+            # If is a cancel/replace order consider also a deletion
+            if order.type in ['U']:
+                trans = sorders.query_id(order.oid)
+                if order.buy_sell == 'S':
                     statistics['sell']['deletedeltatime'].append(order.otime - trans.otime)
                 else:
                     statistics['buy']['deletedeltatime'].append(order.otime - trans.otime)
-            else:
-                print('MISSING DELETED' + order.id)
 
-        # Computes the time between placing and order and its execution
-        if order.type in ['E', 'C']:
-            trans = sorders.query_id(order.id)
-            if trans.buy_sell == 'S':
-                statistics['sell']['executiondeltatime'].append(order.otime - trans.otime)
-                statistics['sell']['executiontime'].append(order.otime)
-                if order.type == 'E':
-                    statistics['sell']['executionprice'].append(trans.price)
-                else:  # Execution with price
-                    statistics['sell']['executionprice'].append(order.price)
-                statistics['sell']['executionsize'].append(order.size)
-            else:
+            # Computes the time between placing and order and canceling it
+            if order.type == 'D':
+                trans = sorders.query_id(order.id)
+                if trans is not None:
+                    if trans.buy_sell == 'S':
+                        statistics['sell']['deletedeltatime'].append(order.otime - trans.otime)
+                    else:
+                        statistics['buy']['deletedeltatime'].append(order.otime - trans.otime)
+                else:
+                    print('MISSING DELETED' + order.id)
 
-                statistics['buy']['executiondeltatime'].append(order.otime - trans.otime)
-                statistics['buy']['executiontime'].append(order.otime)
+            # Computes the time between placing and order and its execution
+            if order.type in ['E', 'C']:
+                trans = sorders.query_id(order.id)
+                if trans.buy_sell == 'S':
+                    statistics['sell']['executiondeltatime'].append(order.otime - trans.otime)
+                    statistics['sell']['executiontime'].append(order.otime)
+                    if order.type == 'E':
+                        statistics['sell']['executionprice'].append(trans.price)
+                    else:  # Execution with price
+                        statistics['sell']['executionprice'].append(order.price)
+                    statistics['sell']['executionsize'].append(order.size)
+                else:
 
-                if order.type == 'E':
-                    statistics['buy']['executionprice'].append(trans.price)
-                else:  # Execution with price
-                    statistics['buy']['executionprice'].append(order.price)
-                statistics['buy']['executionsize'].append(order.size)
+                    statistics['buy']['executiondeltatime'].append(order.otime - trans.otime)
+                    statistics['buy']['executiontime'].append(order.otime)
+
+                    if order.type == 'E':
+                        statistics['buy']['executionprice'].append(trans.price)
+                    else:  # Execution with price
+                        statistics['buy']['executionprice'].append(order.price)
+                    statistics['buy']['executionsize'].append(order.size)
 
     # Convert everything to numpy arrays
     for v in statistics:
@@ -276,6 +276,7 @@ if __name__ == '__main__':
     parser.add_argument('--istock', help="Number of stocks to analyze", type=int, default=0)
     parser.add_argument('--plot', help="Plot graphs of the statistics", action='store_true', default=False)
     parser.add_argument('--log', help="Activity log", action='store_true', default=False)
+    parser.add_argument('--market', help="Process only market hours", action='store_true', default=False)
     args = parser.parse_args()
 
 
@@ -303,6 +304,8 @@ if __name__ == '__main__':
 
     else:
         for day in range(args.init, len(ITCH_days[args.year])):
+            now()
+            print(f'DAY: {ITCH_days[args.year][day]}')
             if args.stock is not None:
                 statistics = order_statistics(args.year, day, args.stock)
                 log_process(statistics, args.log)
@@ -310,6 +313,7 @@ if __name__ == '__main__':
             else:
                 sstocks = Stock(num=args.nstocks)
                 for stock in sstocks.get_list_stocks():
+                    print(f'STOCK= {stock}')
                     statistics = order_statistics(args.year, day, stock)
                     log_process(statistics, args.log)
                     save_statistics(statistics, args.year, day, stock)

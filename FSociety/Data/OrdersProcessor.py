@@ -17,6 +17,8 @@ StockOrders
 
 """
 
+
+
 __author__ = 'bejar'
 # TODO: This structure should be completed to be able to compute the order book
 class OrdersProcessor:
@@ -51,6 +53,7 @@ class OrdersProcessor:
         :param order:
         :return:
         """
+
         # Order Add (B/S)
         if order.type in ['A', 'F']:
             self.orders[order.id] = order

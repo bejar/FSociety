@@ -29,6 +29,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from FSociety.Data import Stock
+from FSociety.Util import time_to_nanoseconds
 
 def sum_count(count, lim=0):
     """
@@ -46,7 +47,7 @@ __author__ = 'bejar'
 
 timelines = [10_000_000_000, 1_000_000_000, 100_000_000, 10_000_000, 1_000_000, 100_000, 10_000, 0]
 ntimelines = ['inf-10s', '10s-1s', '1s-100ms', '100ms-10ms', '10ms-1ms', '1ms-100 mcs', '100mcs-10mcs', '10mcs-0']
-stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'otherprice']
+stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'otherprice', 'size']
 
 
 def in_timeline(v):
@@ -61,7 +62,7 @@ def in_timeline(v):
             return i
 
 
-def order_exec_analysis(year, day, stock, logging=False):
+def order_exec_analysis(year, day, stock, logging=False, market=False):
     """
 
     :param year:
@@ -91,28 +92,35 @@ def order_exec_analysis(year, day, stock, logging=False):
 
     # Add to the list an open order with its time
     for o in lopen:
-        lorders.append((o.otime, 'O', o.id))
+        if not market or (time_to_nanoseconds(9,30) < o.otime < time_to_nanoseconds(16)):
+            lorders.append((o.otime, 'O', o.id))
 
     # Add to the list an executed order with the time of all the partial
     # executions and the last execution
     for o in lexecuted:
-        lorders.append((o.otime, 'XI', o.id))
+        if not market or (time_to_nanoseconds(9,30) < o.otime < time_to_nanoseconds(16)):
+            lorders.append((o.otime, 'XI', o.id))
         # Partial executions
         for xo in range(1, len(o.history) - 1):
             if o.history[xo].type in ['C', 'E']:
-                lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
+                if not market or (time_to_nanoseconds(9,30) < o.history[xo].otime < time_to_nanoseconds(16)):
+                    lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
         # Final execution
-        lorders.append((o.history[-1].otime, f'XF', o.id))
+        if not market or (time_to_nanoseconds(9,30) < o.history[-1].otime < time_to_nanoseconds(16)):
+            lorders.append((o.history[-1].otime, f'XF', o.id))
 
     # Add to the list a cancelled order with the time of the initial order
     # all the possible partial executions
     # and the time of the final cancellation
     for o in lcancelled:
-        lorders.append((o.otime, 'CI', o.id))
+        if not market or (time_to_nanoseconds(9,30) < o.otime < time_to_nanoseconds(16)):
+            lorders.append((o.otime, 'CI', o.id))
         for xo in range(1, len(o.history) - 1):
             if o.history[xo].type in ['C', 'E']:
-                lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
-        lorders.append((o.history[-1].otime, 'CF', o.id))
+                if not market or (time_to_nanoseconds(9,30) < o.history[xo].otime < time_to_nanoseconds(16)):
+                    lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
+        if not market or (time_to_nanoseconds(9,30) < o.history[-1].otime < time_to_nanoseconds(16)):
+            lorders.append((o.history[-1].otime, 'CF', o.id))
 
     lorders = sorted(lorders)
 
@@ -120,6 +128,8 @@ def order_exec_analysis(year, day, stock, logging=False):
     # some statistics
     cbuy = Counter()
     csell = Counter()
+    weird = 0
+    texec = 0
     for _, op, orderid in lorders:
         if op == 'O':
             if sorders.orders[orderid].buy_sell == 'B':
@@ -146,7 +156,6 @@ def order_exec_analysis(year, day, stock, logging=False):
                 csell[sorders.executed[orderid].price] += 1
             # sexec.append(orderid)
         else:  # it is an execution
-
             # If is a final execution the code is 'XF', else it has a number attached
             # The final execution eliminates the price from the order book so the first now is the second best price
             if len(op) == 2:
@@ -179,6 +188,7 @@ def order_exec_analysis(year, day, stock, logging=False):
 
             # If any of the queues is empty the statistics make no sense so they are not computed
             if (timeline >= 0) and (bestsell != -1) and (bestbuy != -1):
+                texec += 1
 
                 if logging:
                     print(f'******************************************** {op[2:]}')
@@ -207,18 +217,12 @@ def order_exec_analysis(year, day, stock, logging=False):
                     diff = exprice - bestbuy
                     if logging:
                         print(f'BUY: {exprice} / GAP: {gap:3.2f} / DIFF: {diff:3.2f}')
-                        if gap < 0 or diff < 0:
-                            print(f'?????????????????????????????????????????????????????????????')
-                            print(f'P:{exprice} BS: {bestsell} BB: {bestbuy}')
                 else:
                     buy_sell = 'sell'
                     gap = exprice - bestbuy
                     diff = bestsell - exprice
                     if logging:
                         print(f'SELL: {exprice} / GAP: {gap:3.2f} / DIFF: {diff:3.2f}')
-                        if gap < 0 or diff < 0:
-                            print(f'?????????????????????????????????????????????????????????????')
-                            print(f'P:{exprice} BS: {bestsell} BB: {bestbuy}')
 
                 if logging:
                     print(f'QSELL5={pendingsell[:5]}')
@@ -226,17 +230,32 @@ def order_exec_analysis(year, day, stock, logging=False):
                     print(f'BBUY={bestbuy} BSELL={bestsell}')
                     print(f'LQBUY={sum_count(pendingbuy)} LQSELL={sum_count(pendingbuy)}')
 
-                statistics[timelines[timeline]][buy_sell]['price'].append(sorders.executed[orderid].price)
-                statistics[timelines[timeline]][buy_sell]['lenbuy'].append(sum_count(pendingbuy))
-                statistics[timelines[timeline]][buy_sell]['lensell'].append(sum_count(pendingsell))
-                statistics[timelines[timeline]][buy_sell]['lenbuy5'].append(sum_count(pendingbuy, lim=5))
-                statistics[timelines[timeline]][buy_sell]['lensell5'].append(sum_count(pendingsell, lim=5))
-                statistics[timelines[timeline]][buy_sell]['lenbuy10'].append(sum_count(pendingbuy, lim=10))
-                statistics[timelines[timeline]][buy_sell]['lensell10'].append(sum_count(pendingsell, lim=10))
-                statistics[timelines[timeline]][buy_sell]['otherprice'].append(diff)
-                statistics[timelines[timeline]][buy_sell]['gap'].append(gap)
+                if gap < 0 or diff < 0:
+                    weird += 1
+                    pass
+                    print(f'?????????????????????????????????????????????????????????????')
+                    print(f'OP: {buy_sell} OTHER= {gap} SECOND= {diff}')
+                    print(f'ID: {orderid}')
+                    print(sorders.executed[orderid].to_string(history=True))
+                    print(f'P:{exprice} BS: {bestsell} BB: {bestbuy}')
+                    print(f'QSELL5={pendingsell[:5]}')
+                    print(f'QBUY5={pendingbuy[:5]}')
+                    print(f'BBUY={bestbuy} BSELL={bestsell}')
+                    print(f'LQBUY={sum_count(pendingbuy)} LQSELL={sum_count(pendingbuy)}')
 
+                else:
+                    statistics[timelines[timeline]][buy_sell]['price'].append(sorders.executed[orderid].price)
+                    statistics[timelines[timeline]][buy_sell]['lenbuy'].append(sum_count(pendingbuy))
+                    statistics[timelines[timeline]][buy_sell]['lensell'].append(sum_count(pendingsell))
+                    statistics[timelines[timeline]][buy_sell]['lenbuy5'].append(sum_count(pendingbuy, lim=5))
+                    statistics[timelines[timeline]][buy_sell]['lensell5'].append(sum_count(pendingsell, lim=5))
+                    statistics[timelines[timeline]][buy_sell]['lenbuy10'].append(sum_count(pendingbuy, lim=10))
+                    statistics[timelines[timeline]][buy_sell]['lensell10'].append(sum_count(pendingsell, lim=10))
+                    statistics[timelines[timeline]][buy_sell]['otherprice'].append(diff)
+                    statistics[timelines[timeline]][buy_sell]['gap'].append(gap)
+                    statistics[timelines[timeline]][buy_sell]['size'].append(exorder.size)
 
+    print(f"W={weird} TEX={texec}")
     for st in stat:
         for v in timelines:
             statistics[v]['buy'][st] = np.array(statistics[v]['buy'][st])
