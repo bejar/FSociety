@@ -73,7 +73,7 @@ def order_statistics(year, day, stock):
     norders = 0
 
     rfile = ITCHMessages(year, day, stock)
-    sorders = OrdersProcessor(history=True)
+    sorders = OrdersProcessor()
     rfile.open()
 
 

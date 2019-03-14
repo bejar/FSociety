@@ -79,7 +79,7 @@ def order_exec_analysis(year, day, stock, logging=False, market=False):
 
     rfile = ITCHMessages(year, day, stock)
     rfile.open()
-    sorders = OrdersProcessor(history=True)
+    sorders = OrdersProcessor()
     for order in rfile.get_order():
         sorders.insert_order(order)
 
@@ -90,24 +90,29 @@ def order_exec_analysis(year, day, stock, logging=False, market=False):
     # list for storing all the orders in chonological order
     lorders = []
 
-    # Add to the list an open order with its time
+    # Add to the list an open order with its time and all the partial executions
     for o in lopen:
         if not market or (time_to_nanoseconds(9,30) < o.otime < time_to_nanoseconds(16)):
             lorders.append((o.otime, 'O', o.id))
+            # Orders still open buy maybe partially executed
+            for xo in range(1, len(o.history)):
+                if o.history[xo].type in ['C', 'E']:
+                    if not market or (time_to_nanoseconds(9,30) < o.history[xo].otime < time_to_nanoseconds(16)):
+                        lorders.append((o.history[xo].otime, f'OF{xo}', o.id))
 
     # Add to the list an executed order with the time of all the partial
     # executions and the last execution
     for o in lexecuted:
         if not market or (time_to_nanoseconds(9,30) < o.otime < time_to_nanoseconds(16)):
             lorders.append((o.otime, 'XI', o.id))
-        # Partial executions
-        for xo in range(1, len(o.history) - 1):
-            if o.history[xo].type in ['C', 'E']:
-                if not market or (time_to_nanoseconds(9,30) < o.history[xo].otime < time_to_nanoseconds(16)):
-                    lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
-        # Final execution
-        if not market or (time_to_nanoseconds(9,30) < o.history[-1].otime < time_to_nanoseconds(16)):
-            lorders.append((o.history[-1].otime, f'XF', o.id))
+            # Partial executions
+            for xo in range(1, len(o.history) - 1):
+                if o.history[xo].type in ['C', 'E']:
+                    if not market or (time_to_nanoseconds(9,30) < o.history[xo].otime < time_to_nanoseconds(16)):
+                        lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
+            # Final execution
+            if not market or (time_to_nanoseconds(9,30) < o.history[-1].otime < time_to_nanoseconds(16)):
+                lorders.append((o.history[-1].otime, f'XF', o.id))
 
     # Add to the list a cancelled order with the time of the initial order
     # all the possible partial executions
@@ -115,12 +120,13 @@ def order_exec_analysis(year, day, stock, logging=False, market=False):
     for o in lcancelled:
         if not market or (time_to_nanoseconds(9,30) < o.otime < time_to_nanoseconds(16)):
             lorders.append((o.otime, 'CI', o.id))
-        for xo in range(1, len(o.history) - 1):
-            if o.history[xo].type in ['C', 'E']:
-                if not market or (time_to_nanoseconds(9,30) < o.history[xo].otime < time_to_nanoseconds(16)):
-                    lorders.append((o.history[xo].otime, f'XF{xo}', o.id))
-        if not market or (time_to_nanoseconds(9,30) < o.history[-1].otime < time_to_nanoseconds(16)):
-            lorders.append((o.history[-1].otime, 'CF', o.id))
+            for xo in range(1, len(o.history) - 1):
+                if o.history[xo].type in ['C', 'E']:
+                    if not market or (time_to_nanoseconds(9,30) < o.history[xo].otime < time_to_nanoseconds(16)):
+                        lorders.append((o.history[xo].otime, f'UF{xo}', o.id))
+            # Last item should be a cancelation (X) or a cancel/replace (U)
+            if not market or (time_to_nanoseconds(9,30) < o.history[-1].otime < time_to_nanoseconds(16)):
+                lorders.append((o.history[-1].otime, 'CF', o.id))
 
     lorders = sorted(lorders)
 
@@ -158,60 +164,50 @@ def order_exec_analysis(year, day, stock, logging=False, market=False):
         else:  # it is an execution
             # If is a final execution the code is 'XF', else it has a number attached
             # The final execution eliminates the price from the order book so the first now is the second best price
+            exorder = sorders.query_id(orderid)
+
             if len(op) == 2:
-                if sorders.executed[orderid].buy_sell == 'B':
-                    cbuy[sorders.executed[orderid].price] -= 1
+                if exorder.buy_sell == 'B':
+                    cbuy[exorder.price] -= 1
                 else:
-                    csell[sorders.executed[orderid].price] -= 1
+                    csell[exorder.price] -= 1
 
             pendingbuy = sorted([v for v in cbuy.items() if v[1] > 0], reverse=True)
             pendingsell = sorted([v for v in csell.items() if v[1] > 0])
 
             # Checks if the queues are empty
-            if len(pendingbuy) > 0:
-                bestbuy = pendingbuy[0][0]
-            else:
-                bestbuy = -1
-                print('cola vacia BUY')
-            if len(pendingsell) > 0:
-                bestsell = pendingsell[0][0]
-            else:
-                bestsell = -1
-                print('cola vacia SELL')
+
+            bestbuy = pendingbuy[0][0] if len(pendingbuy) > 0 else -1
+            bestsell = pendingsell[0][0] if len(pendingsell) > 0 else -1
 
             if len(op) == 2:
-                timeline = in_timeline(sorders.executed[orderid].history_time_length())
+                timeline = in_timeline(exorder.history_time_length())
             else:
-                timeline = in_timeline(sorders.executed[orderid].history_time_length(dist=int(op[2:])))
+                timeline = in_timeline(exorder.history_time_length(dist=int(op[2:])))
 
             # print(f'{sorders.executed[orderid].price} {pendingbuy[0]} {pendingsell[0]}')
 
             # If any of the queues is empty the statistics make no sense so they are not computed
-            if (timeline >= 0) and (bestsell != -1) and (bestbuy != -1):
+            if (bestsell != -1) and (bestbuy != -1):
                 texec += 1
 
                 if logging:
                     print(f'******************************************** {op[2:]}')
                     print(f'ID: {orderid}')
-                    print(sorders.executed[orderid].to_string(history=True))
+                    print(exorder.to_string(history=True))
 
-                # Get the execution order
+                # Get the execution order number
                 if len(op) == 2:
-                    exorder = sorders.executed[orderid].history[-1]
+                    hist_exorder = exorder.history[-1]
                 else:
-                    exorder = sorders.executed[orderid].history[int(op[2:])]
+                    hist_exorder = exorder.history[int(op[2:])]
 
                 # Get the price of the executed order (if the type is C then it is an execution with price)
-                if exorder.type == 'C':
-                    exprice = exorder.price
-                    # if logging:
-                    #     print(f'####################### Executed with price {exprice} but price was {sorders.executed[orderid].price}')
-                else:
-                    exprice = sorders.executed[orderid].price
+                exprice = hist_exorder.price if exorder.type == 'C' else exorder.price
 
                 # gap - the difference between the price of the execution and the best price of the other side
                 # diff - the difference between the price of the execution and the second best price
-                if sorders.executed[orderid].buy_sell == 'B':
+                if exorder.buy_sell == 'B':
                     buy_sell = 'buy'
                     gap = bestsell - exprice
                     diff = exprice - bestbuy
@@ -233,18 +229,18 @@ def order_exec_analysis(year, day, stock, logging=False, market=False):
                 if gap < 0 or diff < 0:
                     weird += 1
                     pass
-                    print(f'?????????????????????????????????????????????????????????????')
-                    print(f'OP: {buy_sell} OTHER= {gap} SECOND= {diff}')
-                    print(f'ID: {orderid}')
-                    print(sorders.executed[orderid].to_string(history=True))
-                    print(f'P:{exprice} BS: {bestsell} BB: {bestbuy}')
-                    print(f'QSELL5={pendingsell[:5]}')
-                    print(f'QBUY5={pendingbuy[:5]}')
-                    print(f'BBUY={bestbuy} BSELL={bestsell}')
-                    print(f'LQBUY={sum_count(pendingbuy)} LQSELL={sum_count(pendingbuy)}')
+                    # print(f'?????????????????????????????????????????????????????????????')
+                    # print(f'OP: {buy_sell} OTHER= {gap} SECOND= {diff}')
+                    # print(f'ID: {orderid}')
+                    # print(exorder.to_string(history=True))
+                    # print(f'P:{exprice} BS: {bestsell} BB: {bestbuy}')
+                    # print(f'QSELL5={pendingsell[:5]}')
+                    # print(f'QBUY5={pendingbuy[:5]}')
+                    # print(f'BBUY={bestbuy} BSELL={bestsell}')
+                    # print(f'LQBUY={sum_count(pendingbuy)} LQSELL={sum_count(pendingbuy)}')
 
                 else:
-                    statistics[timelines[timeline]][buy_sell]['price'].append(sorders.executed[orderid].price)
+                    statistics[timelines[timeline]][buy_sell]['price'].append(exprice)
                     statistics[timelines[timeline]][buy_sell]['lenbuy'].append(sum_count(pendingbuy))
                     statistics[timelines[timeline]][buy_sell]['lensell'].append(sum_count(pendingsell))
                     statistics[timelines[timeline]][buy_sell]['lenbuy5'].append(sum_count(pendingbuy, lim=5))
@@ -253,7 +249,7 @@ def order_exec_analysis(year, day, stock, logging=False, market=False):
                     statistics[timelines[timeline]][buy_sell]['lensell10'].append(sum_count(pendingsell, lim=10))
                     statistics[timelines[timeline]][buy_sell]['otherprice'].append(diff)
                     statistics[timelines[timeline]][buy_sell]['gap'].append(gap)
-                    statistics[timelines[timeline]][buy_sell]['size'].append(exorder.size)
+                    statistics[timelines[timeline]][buy_sell]['size'].append(hist_exorder.size)
 
     print(f"W={weird} TEX={texec}")
     for st in stat:

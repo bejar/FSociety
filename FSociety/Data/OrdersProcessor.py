@@ -30,21 +30,18 @@ class OrdersProcessor:
     Each element stores the stock tick and the time of the order
     """
     orders = None  # Dictionary for active orders
-    cancelled = None  # Dictionary for cancelled orders
-    executed = None  # Dictionary for executed orders
-    full_history = False  # Whether cancellations and executions are also recorded
+    cancelled = None  # Dictionary for totally cancelled orders
+    executed = None  # Dictionary for totally executed orders
 
-    def __init__(self, history=False):
+    def __init__(self):
         """
-        If history is True record information of the orders modifications and saves the
+        Record information of the orders modifications and saves the
         executed and canceled transactions (it needs lots of memory and only is feasible
         for individual stocks)
         """
-        self.full_history = history
         self.orders = {}
-        if self.full_history:
-            self.cancelled = {}  # Dictionary for cancelled orders
-            self.executed = {}  # Dictionary for executed orders
+        self.cancelled = {}  # Dictionary for cancelled orders
+        self.executed = {}  # Dictionary for executed orders
 
     def insert_order(self, order):
         """
@@ -60,67 +57,54 @@ class OrdersProcessor:
 
         # Order Executed (total or partial)
         if order.type in ['E']:
-            if self.full_history:
-                # Modify the size of the order
-                self.orders[order.id].size -= order.size
-                # Add to the history of executions of the order its execution
-                self.orders[order.id].history.append(order)
-                # If no shares left, move it to executed
-                if self.orders[order.id].size == 0:
-                    self.executed[order.id] = self.orders.pop(order.id)
-                else:
-                    self.executed[order.id] = self.orders[order.id]
-            # else:
-            #     self.orders.pop(order.id)
+            # Modify the size of the order
+            self.orders[order.id].size -= order.size
+            # Add to the history of executions of the order
+            self.orders[order.id].history.append(order)
+            # If no shares left, move it to executed
+            if self.orders[order.id].size == 0:
+                self.executed[order.id] = self.orders.pop(order.id)
+            elif self.orders[order.id].size < 0:
+                print('--------------------> Shares Overexecuted E')
 
         # Order Executed (total or partial) with price
         if order.type in ['C']:
-            if self.full_history:
-                # Modify the size of the order
-                self.orders[order.id].size -= order.size
-                # Add to the history of executions of the order its execution
-                self.orders[order.id].history.append(order)
-                # If no shares left, move it to executed
-                if self.orders[order.id].size == 0:
-                    self.executed[order.id] = self.orders.pop(order.id)
-                else:
-                    self.executed[order.id] = self.orders[order.id]
-
+            # Modify the size of the order
+            self.orders[order.id].size -= order.size
+            # Add to the history of executions of the order
+            self.orders[order.id].history.append(order)
+            # If no shares left, move it to executed
+            if self.orders[order.id].size == 0:
+                self.executed[order.id] = self.orders.pop(order.id)
+            elif self.orders[order.id].size < 0:
+                print('--------------------> Shares Overexecuted C')
 
         # Order Replace (cancel+replace)
         if order.type == 'U':
-            # Add a new order with the new parameters
+            # Copy from the original data the B/S value
             order.buy_sell = self.orders[order.oid].buy_sell
+            # Add a new order with the new parameters
             self.orders[order.id] = order
             # Delete the original order from active orders
             ro = self.orders.pop(order.oid)
-            ro.history.append(order)
-            if self.full_history:
-                self.cancelled[order.oid] = ro
-            #if self.history:
-                # Add the history of the original order
-            #    self.orders[order.id].history = ro.history + self.orders[order.id].history
+            ro.history.append(order)  # Adds this cancel/replace as the end of original order
+            # Move it to cancelled orders
+            self.cancelled[order.oid] = ro
 
         # Delete Order
         if order.type == 'D':
-            if self.full_history:
-                self.cancelled[order.id] = self.orders.pop(order.id)
-                self.cancelled[order.id].history.append(order)
-            # else:
-            #     self.orders.pop(order.id)
+            self.cancelled[order.id] = self.orders.pop(order.id)
+            self.cancelled[order.id].history.append(order)
 
         # Partial cancelation
         if order.type == 'X':
-            if self.full_history:
-                self.orders[order.id].size -= order.size  # Modify the size of the order
-                self.orders[order.id].history.append(order)
-                if self.orders[order.id].size == 0:
-                    self.cancelled[order.id] = self.orders.pop(order.id)
-                # else:
-                #     self.cancelled[order.id] = self.orders[order.id]
-
-        #if order.type == 'P':
-            
+            self.orders[order.id].size -= order.size  # Modify the size of the order
+            self.orders[order.id].history.append(order)
+            # If there are no shares left move it to cancelled
+            if self.orders[order.id].size == 0:
+                self.cancelled[order.id] = self.orders.pop(order.id)
+            elif self.orders[order.id].size < 0:
+               print('--------------------> Shares Overcancelled')
 
 
     def query_id(self, id):
@@ -225,7 +209,7 @@ if __name__ == '__main__':
     stock = 'MSFT'
     rfile = ITCHMessages(year, day, stock)
     rfile.open()
-    sorders = OrdersProcessor(history=True)
+    sorders = OrdersProcessor()
     for order in rfile.get_order():
         # print(order.to_string(history=False))
         sorders.insert_order(order)

@@ -47,7 +47,7 @@ if __name__ == '__main__':
         datapath = datapath + '/GIS/'
 
     rfile = ITCHMessages(year, day, stock)
-    sorders = OrdersProcessor(history=True)
+    sorders = OrdersProcessor()
     ocounter = OrdersCounter(select=['A', 'F', 'E', 'U', 'C', 'D', 'X'], granularity='m')
     rfile.open()
 

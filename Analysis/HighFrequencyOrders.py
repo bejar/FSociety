@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     rfile = ITCHMessages(year, day, stock)
     rfile.open()
-    sorders = OrdersProcessor(history=True)
+    sorders = OrdersProcessor()
 
     for order in rfile.get_order():
         # print(order.to_string())
