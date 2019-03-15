@@ -28,6 +28,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from FSociety.Util import nanoseconds_to_time, capped_prices
 import pickle
+from collections import Counter
+import pandas as pd
+from FSociety.Data.TimeLineSummary import ntimelines
 
 __author__ = 'bejar'
 
@@ -133,6 +136,39 @@ def plot_statistics(statistics):
     plt.show()
 
 
+def plot_deltatime_heatmap(lcount,mxlen,title):
+    """
+    Plots a heatmap of a delta time
+    :return:
+    """
+    dexcount = {'day': [], 'time': [], 'val': []}
+
+    for day, count in zip(ITCH_days[args.year], lcount):
+        for v in range(4, mxlen):
+            dexcount['day'].append(day)
+            dexcount['time'].append(v)
+            if v in count:
+                dexcount['val'].append(count[v])
+            else:
+                dexcount['val'].append(0)
+
+    dfexcount = pd.DataFrame(dexcount)
+
+    f, ax = plt.subplots(figsize=(9, 6))
+    # sns.heatmap(dfexcount.pivot('time', 'day', 'val'), annot=True, fmt="d", linewidths=.5, ax=ax,
+    #             yticklabels=ntimelines, cmap='Reds')
+    sns.heatmap(dfexcount.pivot('time', 'day', 'val'), annot=False, linewidths=.5, ax=ax,
+                yticklabels=ntimelines, cmap='Reds')
+    plt.title(title, fontsize=20)
+    plt.show()
+
+def normalize_counter(counter):
+    tsum = np.sum([v for v in counter.values()])
+    dcounter = dict(counter)
+    for v in dcounter:
+        dcounter[v]=dcounter[v]/tsum
+    return dcounter
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', help="Anyo del analisis", default='2017G')
@@ -141,9 +177,10 @@ if __name__ == '__main__':
     parser.add_argument('--kde', help="Show Kernel Density Estimation", action='store_true', default=False)
     parser.add_argument('--log', help="some logging", action='store_true', default=False)
     parser.add_argument('--bins', help="Number of histogram bins", type=int, default=10)
+    parser.add_argument('--month', help="Plots for all the days in a year", action='store_true', default=False)
 
     args = parser.parse_args()
-    itchday = ITCH_days[args.year][args.day]
+    # itchday = ITCH_days[args.year][args.day]
     if 'G' in args.year:
         # lfiles = [f'/S{day}-v50.txt.gz' for day in ITCH_days[year]]
         # datapath = datapath + '/GIS/'
@@ -153,21 +190,58 @@ if __name__ == '__main__':
         analysispath = datapath + '/Analysis'
 
 
-    rfile = open(f'{analysispath}/{ITCH_days[args.year][args.day]}-{args.stock}-ActivityStatistics.pkl', 'rb')
-    statistics = pickle.load(rfile)
-    rfile.close()
 
-    if args.log:
-        print('N Buy orders:', len(statistics['buy']['ordertime']))
-        print('N Sell orders:', len(statistics['sell']['ordertime']))
-        print('N Order Executions Sell:', len(statistics['sell']['executiondeltatime']))
-        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['sell']['executiondeltatime'])))
-        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['sell']['executiondeltatime'])))
-        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['sell']['executiondeltatime'])))
-        print('N Order Executions Buy:', len(statistics['buy']['executiondeltatime']))
-        print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['buy']['executiondeltatime'])))
-        print('Max time to execution:', nanoseconds_to_time(np.max(statistics['buy']['executiondeltatime'])))
-        print('Min time to execution:', nanoseconds_to_time(np.min(statistics['buy']['executiondeltatime'])))
+    if not args.month:
+        rfile = open(f'{analysispath}/{ITCH_days[args.year][args.day]}-{args.stock}-ActivityStatistics.pkl', 'rb')
+        statistics = pickle.load(rfile)
+        rfile.close()
+        if args.log:
+            print('N Buy orders:', len(statistics['buy']['ordertime']))
+            print('N Sell orders:', len(statistics['sell']['ordertime']))
+            print('N Order Executions Sell:', len(statistics['sell']['executiondeltatime']))
+            print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['sell']['executiondeltatime'])))
+            print('Max time to execution:', nanoseconds_to_time(np.max(statistics['sell']['executiondeltatime'])))
+            print('Min time to execution:', nanoseconds_to_time(np.min(statistics['sell']['executiondeltatime'])))
+            print('N Order Executions Buy:', len(statistics['buy']['executiondeltatime']))
+            print('Mean time to execution:', nanoseconds_to_time(np.mean(statistics['buy']['executiondeltatime'])))
+            print('Max time to execution:', nanoseconds_to_time(np.max(statistics['buy']['executiondeltatime'])))
+            print('Min time to execution:', nanoseconds_to_time(np.min(statistics['buy']['executiondeltatime'])))
 
 
-    plot_statistics(statistics)
+        plot_statistics(statistics)
+    else:
+        ntimelines.reverse()
+        dstat = {'buy':{'executiondeltatime':[], 'deletedeltatime':[]}, 'sell':{'executiondeltatime':[], 'deletedeltatime':[]}}
+        mxlens = 0
+        mxlenb = 0
+        for day in ITCH_days[args.year]:
+            rfile = open(f'{analysispath}/{day}-{args.stock}-ActivityStatistics.pkl', 'rb')
+            statistics = pickle.load(rfile)
+            rfile.close()
+
+
+            ldata = np.trunc(np.log10(statistics['buy']['executiondeltatime']))
+            excount = normalize_counter(Counter(ldata))
+            mxlens = len(excount) if len(excount) > mxlens else mxlens
+            dstat['buy']['executiondeltatime'].append(excount)
+
+            ldata = np.trunc(np.log10(statistics['sell']['executiondeltatime']))
+            excount = normalize_counter(Counter(ldata))
+            mxlenb = len(excount) if len(excount) > mxlenb else mxlenb
+            dstat['sell']['executiondeltatime'].append(excount)
+
+            ldata = np.trunc(np.log10(statistics['buy']['deletedeltatime']))
+            excount = normalize_counter(Counter(ldata))
+            # mxlenb = len(excount) if len(excount) > mxlenb else mxlenb
+            dstat['buy']['deletedeltatime'].append(excount)
+
+            ldata = np.trunc(np.log10(statistics['sell']['deletedeltatime']))
+            excount = normalize_counter(Counter(ldata))
+            # mxlenb = len(excount) if len(excount) > mxlenb else mxlenb
+            dstat['sell']['deletedeltatime'].append(excount)
+
+        plot_deltatime_heatmap(dstat['buy']['executiondeltatime'],mxlens,f'{args.year}/month Buy delta execution time distribution {args.stock}')
+        plot_deltatime_heatmap(dstat['sell']['executiondeltatime'],mxlenb,f'{args.year}/month Sell delta execution time distribution {args.stock}')
+        plot_deltatime_heatmap(dstat['buy']['deletedeltatime'],mxlens,f'{args.year}/month Buy delta delete time distribution {args.stock}')
+        plot_deltatime_heatmap(dstat['sell']['deletedeltatime'],mxlenb,f'{args.year}/month Sell delta delete time distribution {args.stock}')
+
