@@ -21,10 +21,11 @@ from .Company import Company
 from .MPI import MPI
 from .OrdersProcessor import OrdersProcessor
 from .Stock import Stock
-from FSociety.Data.Old.OrderOld import Order
 from .OrdersCounter import OrdersCounter
+from .HFTStatistics import HFTStatistics
+from .ActivityStatistics import ActivityStatistics
 
 __author__ = 'bejar'
 
 __all__ = ['Company', 'Stock',
-           'MPI', 'OrdersProcessor', 'Order', 'OrdersCounter']
+           'MPI', 'OrdersProcessor', 'Order', 'OrdersCounter', 'HFTStatistics', 'ActivityStatistics']

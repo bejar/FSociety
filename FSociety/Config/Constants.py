@@ -21,6 +21,12 @@ __author__ = 'bejar'
 
 datapath = '/home/bejar/storage/Data/ITCH/'
 
+timelines = [10_000_000_000, 1_000_000_000, 100_000_000, 10_000_000, 1_000_000, 100_000, 10_000, 0]
+ntimelines = ['inf-10s', '10s-1s', '1s-100ms', '100ms-10ms', '10ms-1ms', '1ms-100 mcs', '100mcs-10mcs', '10mcs-0']
+stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'otherprice', 'size']
+
+
+
 ITCH_days = {
              '2015': ['02022015', '04022015', '05012015', '07302015', '08122015', '10302015', '12302015'],
              '2016': ['03302016', '05272016', '07292016', '08302016', '12302016'],

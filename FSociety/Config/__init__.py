@@ -19,6 +19,6 @@ __init__.py
 
 __author__ = 'bejar'
 
-from .Constants import ITCH_days, NASDAQ_actions, datapath
+from .Constants import ITCH_days, NASDAQ_actions, datapath, timelines, ntimelines, stat
 
-__all__ = ['NASDAQ_actions', 'datapath', 'ITCH_days']
+__all__ = ['NASDAQ_actions', 'datapath', 'ITCH_days', 'timelines', 'ntimelines', 'stat']

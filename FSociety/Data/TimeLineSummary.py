@@ -23,7 +23,7 @@ TimeLineSummary
 import argparse
 from FSociety.ITCH import ITCHMessages
 from FSociety.Data import OrdersProcessor
-from FSociety.Config import ITCH_days
+from FSociety.Config import ITCH_days, timelines, ntimelines, stat
 from collections import Counter
 import numpy as np
 import seaborn as sns
@@ -45,9 +45,9 @@ def sum_count(count, lim=0):
 
 __author__ = 'bejar'
 
-timelines = [10_000_000_000, 1_000_000_000, 100_000_000, 10_000_000, 1_000_000, 100_000, 10_000, 0]
-ntimelines = ['inf-10s', '10s-1s', '1s-100ms', '100ms-10ms', '10ms-1ms', '1ms-100 mcs', '100mcs-10mcs', '10mcs-0']
-stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'otherprice', 'size']
+# timelines = [10_000_000_000, 1_000_000_000, 100_000_000, 10_000_000, 1_000_000, 100_000, 10_000, 0]
+# ntimelines = ['inf-10s', '10s-1s', '1s-100ms', '100ms-10ms', '10ms-1ms', '1ms-100 mcs', '100mcs-10mcs', '10mcs-0']
+# stat = ['price', 'gap', 'lenbuy', 'lensell', 'lenbuy5', 'lensell5', 'lenbuy10', 'lensell10', 'otherprice', 'size']
 
 
 def in_timeline(v):
