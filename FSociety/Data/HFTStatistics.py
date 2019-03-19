@@ -95,12 +95,36 @@ class HFTStatistics:
         :return:
         """
         fig = plt.figure(figsize=(12, 8))
-        plt.title(f'buy - {statistic} / DAY: {ITCH_days[self.year][self.day]} STOCK: {self.stock}')
+        plt.title(f'{side} - {statistic} / DAY: {ITCH_days[self.year][self.day]} STOCK: {self.stock}')
         for v in self.dtimelines:
             sns.distplot(self.statistics[v][side][statistic], hist=True, norm_hist=True, bins=bins, kde=kde,
                          kde_kws={'cut': 0},
                          label=self.dntimelines[self.dtimelines.index(v)])
         plt.legend()
+
+    def single_otherplot(self, side, statistic,plot='boxen'):
+        """
+        different plots
+        plot = ['boxen', 'violin', 'box']
+        :return:
+        """
+        ltime = []
+        ldata = []
+        for v in self.dtimelines:
+            ltime.extend([self.dntimelines[self.dtimelines.index(v)]]*len(self.statistics[v][side][statistic]))
+            ldata.extend(self.statistics[v][side][statistic])
+        data = pd.DataFrame({'time':ltime, statistic:ldata})
+        fig = plt.figure(figsize=(12, 8))
+        plt.title(f'{side} - {statistic} / DAY: {ITCH_days[self.year][self.day]} STOCK: {self.stock}')
+        if plot == 'boxen':
+            sns.boxenplot(x='time',y=statistic,data=data)
+        elif plot == 'violin':
+            sns.violinplot(x='time',y=statistic,data=data)
+        elif plot == 'box':
+            sns.boxplot(x='time',y=statistic,data=data)
+       
+
+        
 
 
     def pair_plot(self, lvars, side, bins=10, kde=False):

@@ -68,8 +68,8 @@ def capped_prices(lprices):
     price_std = np.std(lprices)
     price_mean = np.mean(lprices)
     aprice = np.array(lprices)
-    aprice = aprice[np.logical_and(aprice > (price_mean - (2*price_std)),
-                                aprice < (price_mean + (2*price_std)))]
+    aprice = aprice[np.logical_and(aprice > (price_mean - (price_std)),
+                                aprice < (price_mean + (price_std)))]
 
     return aprice
 

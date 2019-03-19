@@ -59,8 +59,9 @@ class ActivityStatistics:
     maxlen = None
     ntimelines = None
     itchday= None
+    heat=False
 
-    def __init__(self, year, day=None, stock=None):
+    def __init__(self, year, day=None, stock=None, heat=False):
         """
 
         :param year:
@@ -70,6 +71,7 @@ class ActivityStatistics:
         self.year = year
         self.day = day
         self.stock = stock
+        self.heat=heat
 
         if 'G' in year:
             analysispath = datapath + '/GIS/Analysis'
@@ -88,27 +90,33 @@ class ActivityStatistics:
                 statistics = pickle.load(rfile)
                 rfile.close()
 
+                if heat:
+                    ldata = np.trunc(np.log10(statistics['buy']['executiondeltatime']))
+                    excount = normalize_counter(Counter(ldata))
+                    mxlens = len(excount) if len(excount) > mxlens else mxlens
+                    dstat['buy']['executiondeltatime'].append(excount)
 
-                ldata = np.trunc(np.log10(statistics['buy']['executiondeltatime']))
-                excount = normalize_counter(Counter(ldata))
-                mxlens = len(excount) if len(excount) > mxlens else mxlens
-                dstat['buy']['executiondeltatime'].append(excount)
+                    ldata = np.trunc(np.log10(statistics['sell']['executiondeltatime']))
+                    excount = normalize_counter(Counter(ldata))
+                    mxlenb = len(excount) if len(excount) > mxlenb else mxlenb
+                    dstat['sell']['executiondeltatime'].append(excount)
 
-                ldata = np.trunc(np.log10(statistics['sell']['executiondeltatime']))
-                excount = normalize_counter(Counter(ldata))
-                mxlenb = len(excount) if len(excount) > mxlenb else mxlenb
-                dstat['sell']['executiondeltatime'].append(excount)
+                    ldata = np.trunc(np.log10(statistics['buy']['deletedeltatime']))
+                    excount = normalize_counter(Counter(ldata))
+                    dstat['buy']['deletedeltatime'].append(excount)
 
-                ldata = np.trunc(np.log10(statistics['buy']['deletedeltatime']))
-                excount = normalize_counter(Counter(ldata))
-                dstat['buy']['deletedeltatime'].append(excount)
-
-                ldata = np.trunc(np.log10(statistics['sell']['deletedeltatime']))
-                excount = normalize_counter(Counter(ldata))
-                dstat['sell']['deletedeltatime'].append(excount)
+                    ldata = np.trunc(np.log10(statistics['sell']['deletedeltatime']))
+                    excount = normalize_counter(Counter(ldata))
+                    dstat['sell']['deletedeltatime'].append(excount)
+                else:
+                    dstat['buy']['executiondeltatime'].append(np.log10(statistics['buy']['executiondeltatime']))
+                    dstat['sell']['executiondeltatime'].append(np.log10(statistics['sell']['executiondeltatime']))
+                    dstat['buy']['deletedeltatime'].append(np.log10(statistics['buy']['deletedeltatime']))
+                    dstat['sell']['deletedeltatime'].append(np.log10(statistics['sell']['deletedeltatime']))
 
             self.statistics = dstat
-            self.maxlen= np.max([mxlenb, mxlens])
+            if heat:
+                self.maxlen= np.max([mxlenb, mxlens])
         else:
             self.itchday = ITCH_days[year][day]
             rfile = open(f'{analysispath}/{ITCH_days[year][day]}-{stock}-ActivityStatistics.pkl', 'rb')
@@ -167,7 +175,35 @@ class ActivityStatistics:
 
         f, ax = plt.subplots(figsize=(9, 6))
         sns.heatmap(dfexcount.pivot('time', 'day', 'val'), annot=False, linewidths=.5, ax=ax,
-                    yticklabels=self.ntimelines, cmap='Reds')
+                    yticklabels=self.ntimelines, cmap='Reds',vmax=0.5,vmin=0)
+        plt.title(f'{self.year}/month {side} delta {type} time distribution {self.stock}', fontsize=15)
+
+
+    def plot_deltatime_violinplot(self, side='buy', type='execution'):
+        """
+        Plots a heatmap of a delta time
+        side = ['buy', 'sell']
+        type = ['execution', 'delete']
+        :return:
+        """
+        if self.day is not None:
+            raise NameError('Montly data are not loaded')
+        if side not in ['buy', 'sell']:
+            raise NameError('Wrong side value')
+        if type not in ['execution', 'delete']:
+            raise NameError('Wrong type value')
+
+        dexcount = {'day': [], 'time': []}
+        lcount = self.statistics[side][f'{type}deltatime']
+
+        for day, count in zip(ITCH_days[self.year], lcount):
+                dexcount['day'].extend([day]*len(count))
+                dexcount['time'].extend(count)
+
+        dfexcount = pd.DataFrame(dexcount)
+
+        f, ax = plt.subplots(figsize=(16, 6))
+        sns.violinplot(x='day', y='time', data=dfexcount)
         plt.title(f'{self.year}/month {side} delta {type} time distribution {self.stock}', fontsize=15)
 
 
