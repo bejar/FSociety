@@ -7,7 +7,7 @@ Stocks
 :Description: Stocks
 
     Selecciona los mensajes F/A/E/X/D/U/C que aparecen en un dia para las 'nstock'
-    companyias en el fichero 'stockmonthcsv') (companyias con mas operaciones
+    companyias en el fichero 'stockmonth.csv') (companyias con mas operaciones
     de compra/venta)
 
 :Authors: bejar
