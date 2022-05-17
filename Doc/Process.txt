@@ -1,0 +1,15 @@
+
+
+ 1. Extract the messages for a number of stocks
+
+  Scripts/SelectStocksMessages --year XXXX --day X --nstocks XX
+
+   This generates csv files for each stock with the basic information of all the messages and a file
+   with all the messages of a day
+
+ 2. Analysis of the behavior of the messages
+
+  Analysis/HFTAnalysis --year XXXX --day X --stocks AAA
+
+   Analyzes the messages generates a pkl file with results and makes some plots
+
